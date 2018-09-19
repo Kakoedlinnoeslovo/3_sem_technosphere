@@ -31,6 +31,7 @@ class Gradient_Boosting:
 
         self.F = F
         self.b = 0.5
+        #self.b = 1000
         self.global_leaf_numbers = global_leaf_numbers
         self.logistic_regression = logistic_regression
 
@@ -41,12 +42,15 @@ class Gradient_Boosting:
             self.estimators_list.append(first_estimator)
 
         for i in range(len(self.estimators_list), self.n_estimators):
-
             antigrad = - Y - self.F
+
+            #antigrad = Y * np.exp(-(Y * self.F + np.max(Y * self.F)))
             antigrad = antigrad.astype(np.float64)
             new_estimator = Carrot(max_depth = self.max_depth)
             new_estimator.fit(X, antigrad)
             new_estimator_pred = new_estimator.predict(X)
+
+            err = np.mean(np.isclose(new_estimator_pred, antigrad))
             leaf_numbers = new_estimator.decision_path
 
             if self.global_leaf_numbers is not None:
@@ -55,7 +59,8 @@ class Gradient_Boosting:
                 self.global_leaf_numbers = leaf_numbers
 
 
-            self.F +=self.b*new_estimator_pred
+            #self.F +=self.b * (1 - err)/(err) * new_estimator_pred
+            self.F += self.b * new_estimator_pred
             self.estimators_list.append(new_estimator)
 
             logistic_regression = LogisticRegression()
@@ -105,7 +110,7 @@ def unit_test():
         estimators_list, F, global_leaf_numbers  = algo1.fit(X_train, Y_train)
         acs = accuracy_score(Y_test, algo1.predict(X_test))
         losses_my.append(acs)
-        print("My Accuracy: %.4f" % acs)
+        print("my Accuracy: %.4f" % acs)
 
         algo = GradientBoostingClassifier(n_estimators=i,
                                          max_depth=3,
