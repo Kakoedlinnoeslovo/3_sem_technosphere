@@ -4,16 +4,16 @@ from carrot import Carrot
 
 from sklearn.ensemble import GradientBoostingClassifier
 import numpy as np
-from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 
 
 seed = 10
 np.random.seed(seed)
+
+
 
 class Gradient_Boosting:
     def __init__(self, n_estimators=100, max_depth=10,
@@ -31,41 +31,70 @@ class Gradient_Boosting:
 
         self.F = F
         self.b = 0.5
-        #self.b = 1000
         self.global_leaf_numbers = global_leaf_numbers
         self.logistic_regression = logistic_regression
 
-    def fit(self, X, Y):
 
+    @staticmethod
+    def _identify(pred, Y):
+        return np.array([pred == Y]).astype(np.int8)
+
+
+    def _compute_sample_weight(self, y, pred):
+        return np.mean(np.exp(-(2. * y - 1.) * pred))
+
+
+    def negative_gradient(self, y, pred):
+        y_ = -(2. * y - 1.)
+        return y_ * np.exp(y_ * pred - np.max(y_ * pred ))
+
+
+    def _update_terminal_region(self, y, pred) :
+        y_ = 2. * y - 1.
+        for i in range(self.global_leaf_numbers.shape[1]):
+            mask = self.global_leaf_numbers[:, i] == 1
+            sample_weight = self._compute_sample_weight(y[mask], pred[mask])
+            numerator = np.sum(y_[mask] * sample_weight * np.exp(-y_[mask] * pred[mask]))
+            denominator = np.sum(sample_weight * np.exp(-y_[mask] * pred[mask]))
+            if abs(denominator) < 1e-150:
+                for i in np.where(mask)[0]:
+                    self.global_leaf_numbers[i, np.where(self.global_leaf_numbers[i]!=0)[0][0]] = 0
+            else:
+                for i in np.where(mask)[0]:
+                    self.global_leaf_numbers[i, np.where(self.global_leaf_numbers[i] != 0)[0][0]] = numerator / denominator
+
+
+    def compute_antigrad(self, Y):
+        Y_ = -(2. * Y - 1.)
+        return Y_ * np.exp(-(Y_ * self.F) - np.max(Y_ * self.F))
+
+
+    def fit(self, X, Y):
         if self.global_leaf_numbers is None:
             self.F = first_estimator = 0
             self.estimators_list.append(first_estimator)
 
         for i in range(len(self.estimators_list), self.n_estimators):
-            antigrad = - Y - self.F
-
-            #antigrad = Y * np.exp(-(Y * self.F + np.max(Y * self.F)))
+            antigrad = self.compute_antigrad(Y)
             antigrad = antigrad.astype(np.float64)
             new_estimator = Carrot(max_depth = self.max_depth)
             new_estimator.fit(X, antigrad)
             new_estimator_pred = new_estimator.predict(X)
-
-            err = np.mean(np.isclose(new_estimator_pred, antigrad))
             leaf_numbers = new_estimator.decision_path
 
             if self.global_leaf_numbers is not None:
-                self.global_leaf_numbers = np.hstack((self.global_leaf_numbers, leaf_numbers))
+               self.global_leaf_numbers = np.hstack((self.global_leaf_numbers, leaf_numbers))
             else:
                 self.global_leaf_numbers = leaf_numbers
 
-
-            #self.F +=self.b * (1 - err)/(err) * new_estimator_pred
             self.F += self.b * new_estimator_pred
             self.estimators_list.append(new_estimator)
 
-            logistic_regression = LogisticRegression()
+            logistic_regression = LogisticRegression(solver='newton-cg', max_iter=200)
             logistic_regression.fit(self.global_leaf_numbers, Y)
             predicted = logistic_regression.predict(self.global_leaf_numbers)
+
+            self._update_terminal_region(Y, predicted)
             log_out(i, self.n_estimators, predicted , Y, antigrad, new_estimator_pred)
             self.logistic_regression = logistic_regression
         return self.estimators_list, self.F, self.global_leaf_numbers
@@ -83,9 +112,9 @@ class Gradient_Boosting:
                 total_leaf_numbers = np.hstack((total_leaf_numbers, leaf_numbers))
             else:
                 total_leaf_numbers = leaf_numbers
+
         predict = self.logistic_regression.predict(total_leaf_numbers)
         return predict
-
 
 
 def unit_test():
@@ -114,7 +143,8 @@ def unit_test():
 
         algo = GradientBoostingClassifier(n_estimators=i,
                                          max_depth=3,
-                                         min_samples_split=4)
+                                         min_samples_split=4,
+                                         loss = "exponential")
         algo.fit(X_train, Y_train)
         acs = accuracy_score(Y_test, algo.predict(X_test))
         losses_sklearn.append(acs)
