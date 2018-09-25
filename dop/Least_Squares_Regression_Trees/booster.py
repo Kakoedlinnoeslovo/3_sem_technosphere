@@ -159,7 +159,7 @@ def unit_test():
 
     losses_my = list()
     losses_sklearn = list()
-    trees_num = [x * 50 for x in range(4, 8)]
+    trees_num = [10, 20, 30, 40] + [x * 50 for x in range(1, 8)]
 
 
     estimators_list = None
