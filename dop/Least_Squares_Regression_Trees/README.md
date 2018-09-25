@@ -5,4 +5,4 @@ https://stats.stackexchange.com/questions/330849/how-do-newton-raphson-updates-w
 
 
 
-![Alt text](plots/test_loss4.png?raw=true "Test Loss")
+![Alt text](plots/test_loss5.png?raw=true "Test Loss")
