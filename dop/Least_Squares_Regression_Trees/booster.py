@@ -171,6 +171,8 @@ def unit_test():
     ind_list = [i for i in range(len(X_train))]
     shuffle(ind_list)
 
+    Y_test = Y_test * 2 - 1.
+
     for i in tqdm(trees_num):
         algo1 = Booster(n_estimators=i, min_samples_split=4, max_depth=3,
                                   estimators_list=estimators_list,
@@ -178,13 +180,13 @@ def unit_test():
                                   global_leaf_numbers=global_leaf_numbers,
                                   node_weights= node_weights,
                         b = b)
-        b*=0.5
+        #b*=0.5
         estimators_list, F, global_leaf_numbers, node_weights = algo1.fit(X_train[ind_list, :],
                                                                           Y_train[ind_list])
 
 
-
-        aloss = adaboost_loss(Y_test, algo1.predict(X_test))
+        my_pred = algo1.predict(X_test)
+        aloss = adaboost_loss(Y_test, my_pred)
         losses_my.append(aloss)
         print("\nmy AdaboostLoss: %.4f" % aloss)
 
@@ -193,7 +195,8 @@ def unit_test():
                                           min_samples_split=4,
                                           loss="exponential")
         algo.fit(X_train, Y_train)
-        aloss = adaboost_loss(Y_test, algo.predict(X_test))
+        sklearn_pred = algo.predict(X_test)
+        aloss = adaboost_loss(Y_test, sklearn_pred)
         losses_sklearn.append(aloss)
         print("sklearn AdaboostLoss: %.4f" % aloss)
 
