@@ -40,10 +40,10 @@ class DataReader:
                 X = np.array(X)
                 print("End reading data ...")
 
-                # print("Normalising data ...")
-                # mean = X.mean(axis=0)
-                # std = X.std(axis=0)
-                # X = (X - mean) / std
+                print("Normalising data ...")
+                mean = X.mean(axis=0)
+                std = X.std(axis=0)
+                X = (X - mean) / std
                 return X, y
 
         if ttype == "classification":
@@ -65,19 +65,19 @@ class DataReader:
             y = np.array(y_list).astype(np.int8)
             print("End reading data ...")
 
-            # print("Normalising data ...")
-            # mean = X.mean(axis=0)
-            # std = X.std(axis=0)
-            # X = (X - mean) / std
+            print("Normalising data ...")
+            mean = X.mean(axis=0)
+            std = X.std(axis=0)
+            X = (X - mean) / std
             return X, y
 
 
 def plot_graphs(trees_num, losses_my, losses_sklearn):
     fig = plt.figure()
-    fig.suptitle('Accuracy от n_estimators', fontsize=14, fontweight='bold')
+    fig.suptitle('AdaboostLoss от n_estimators', fontsize=14, fontweight='bold')
     ax = fig.add_subplot(111)
     ax.set_xlabel('n_estimators')
-    ax.set_ylabel("Accuracy")
+    ax.set_ylabel("AdaboostLoss")
     plt.grid()
     ax.plot(trees_num, losses_my, label="My Gradient Boosting")
     ax.plot(trees_num, losses_sklearn, label="Sklearn")
@@ -89,7 +89,11 @@ def plot_graphs(trees_num, losses_my, losses_sklearn):
     plt.show()
 
 
+def adaboost_loss(y_pred, y):
+    return np.mean(np.exp(- y_pred * y))
+
+
 def log_out(i, n_estimators, current_predict, Y, antigrad, y_pred_reg):
     sys.stderr.write('\rLearning estimator number: ' + str(i) + "/" + str(n_estimators) \
-                     + "; Accuracy error on train dataset: " + str(accuracy_score(current_predict, Y)) \
+                     + "; AdaboostLoss error on train dataset: " + str(adaboost_loss(current_predict, Y)) \
                  + "; MSE error on train dataset: {}".format(mean_squared_error(antigrad, y_pred_reg)))

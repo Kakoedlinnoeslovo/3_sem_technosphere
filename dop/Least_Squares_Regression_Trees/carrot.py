@@ -1,6 +1,8 @@
 import numpy as np
 from tqdm import tqdm
 from sklearn.metrics import mean_squared_error as mse
+from sklearn.tree import DecisionTreeRegressor
+import matplotlib.pyplot as plt
 
 from utils import DataReader
 
@@ -133,13 +135,35 @@ def unit_test():
     reader = DataReader()
     X_train, y_train = reader.get(dtype = "train", ttype = "regression")
     X_test, y_test = reader.get(dtype = "test", ttype = "regression")
-    tree = Carrot(max_depth=3)
-    tree.fit(X_train, y_train)
-    y_pred  = tree.predict(X_train)
-    print(tree.decision_path)
-    print("MSE on Train dataset is : {}".format(mse(y_train, y_pred)))
-    y_pred  = tree.predict(X_test)
-    print("MSE on Test dataset is : {}".format(mse(y_test, y_pred)))
+
+
+    loss_list_my = []
+    loss_list_sklearn = []
+    for depth in tqdm(range(3, 30)):
+        tree = Carrot(max_depth=depth)
+
+        tree.fit(X_train, y_train)
+        y_pred  = tree.predict(X_train)
+
+        print("MSE on Train dataset is : {}".format(mse(y_train, y_pred)))
+        y_pred  = tree.predict(X_test)
+        print("MSE on Test dataset is : {}".format(mse(y_test, y_pred)))
+
+        loss_list_my.append(mse(y_test, y_pred))
+
+        tree = DecisionTreeRegressor(max_depth=depth)
+        tree.fit(X_train, y_train)
+        y_pred = tree.predict(X_train)
+        print("MSE on Train dataset is : {}".format(mse(y_train, y_pred)))
+        y_pred = tree.predict(X_test)
+        print("MSE on Test dataset is : {}".format(mse(y_test, y_pred)))
+
+        loss_list_sklearn.append(mse(y_test, y_pred))
+
+    plt.plot(loss_list_my)
+    plt.plot(loss_list_sklearn)
+    plt.show()
+
 
 if __name__ == "__main__":
     unit_test()

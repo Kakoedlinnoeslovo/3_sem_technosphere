@@ -1,112 +1,143 @@
 
-from utils import log_out, plot_graphs, DataReader
+from utils import log_out, plot_graphs, DataReader, adaboost_loss
 from carrot import Carrot
 
 from sklearn.ensemble import GradientBoostingClassifier
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import accuracy_score
 from tqdm import tqdm
+from random import shuffle
 
 
 seed = 10
 np.random.seed(seed)
 
 
-
-class Gradient_Boosting:
+class Booster:
     def __init__(self, n_estimators=100, max_depth=10,
                  min_samples_split=1,
-                 estimators_list = None,
+                 estimators_list=None,
                  global_leaf_numbers=None,
-                 F = None, logistic_regression = None):
+                 F=None,
+                 node_weights = None,
+                 b = 0.5):
 
-        self.n_estimators = n_estimators
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
-        self.estimators_list = estimators_list
-        if estimators_list is None:
-            self.estimators_list = list()
 
-        self.F = F
-        self.b = 0.5
-        self.global_leaf_numbers = global_leaf_numbers
-        self.logistic_regression = logistic_regression
+            self.n_estimators = n_estimators
+            self.max_depth = max_depth
+            self.min_samples_split = min_samples_split
+            self.estimators_list = estimators_list
+            if estimators_list is None:
+                self.estimators_list = list()
+
+            self.F = F
+            self.b = b
+            self.global_leaf_numbers = global_leaf_numbers
+            self.node_weights = node_weights
+            self.logistic_regression = None
+
+    @staticmethod
+    def _compute_antigrad(y, F):
+        y_ = 2 * y - 1
+        return y_ * np.exp(-y_ * F - np.max(y_ * F))
 
 
     @staticmethod
-    def _identify(pred, Y):
-        return np.array([pred == Y]).astype(np.int8)
+    def _compute_numerator_node(mask, y_, F, sample_weight):
+        return np.sum(y_[mask] * sample_weight * np.exp(-y_[mask]*F[mask] - np.max(y_[mask]*F[mask])))
+
+
+    @staticmethod
+    def _compute_denominator_node(mask, y_, F, h, sample_weight):
+        result = np.sum(sample_weight * np.exp(-y_[mask] * F[mask] - np.max(y_[mask]*F[mask])))
+        return result
+
+
+    def _compute_step(self, y, new_estimator_pred):
+        y_ = 2. * y - 1.
+        numerator = np.sum(y_*np.exp(-y_*new_estimator_pred - np.max(y_*new_estimator_pred)))
+        denominator = np.sum(np.exp(-y_*new_estimator_pred - np.max(y_*new_estimator_pred)))
+        result = numerator/denominator
+        return result
 
 
     def _compute_sample_weight(self, y, pred):
-        return np.mean(np.exp(-(2. * y - 1.) * pred))
+        return np.mean(np.exp(-(2. * y - 1.) * pred - np.max((2. * y - 1.) * pred)))
 
 
-    def negative_gradient(self, y, pred):
-        y_ = -(2. * y - 1.)
-        return y_ * np.exp(y_ * pred - np.max(y_ * pred ))
+    def _rescale_node(self, y, h, leaf_numbers):
+        node_weights = np.ones(leaf_numbers.shape[1])
+        answer = np.ones((len(y)))
+        y_ = 2 * y - 1
+        n = leaf_numbers.shape[1]
+        for i in range(n):
+            mask = leaf_numbers[:, i] == 1
 
+            if len(y[mask]) == 0:
+                continue
 
-    def _update_terminal_region(self, y, pred) :
-        y_ = 2. * y - 1.
-        for i in range(self.global_leaf_numbers.shape[1]):
-            mask = self.global_leaf_numbers[:, i] == 1
-            sample_weight = self._compute_sample_weight(y[mask], pred[mask])
-            numerator = np.sum(y_[mask] * sample_weight * np.exp(-y_[mask] * pred[mask]))
-            denominator = np.sum(sample_weight * np.exp(-y_[mask] * pred[mask]))
+            sample_weight = self._compute_sample_weight(y[mask], h[mask])
+            numerator = self._compute_numerator_node(mask, y_, self.F, sample_weight)
+            denominator = self._compute_denominator_node(mask, y_, self.F, h, sample_weight)
             if abs(denominator) < 1e-150:
-                for i in np.where(mask)[0]:
-                    self.global_leaf_numbers[i, np.where(self.global_leaf_numbers[i]!=0)[0][0]] = 0
+                for j in np.where(mask)[0]:
+                    leaf_numbers[j,i] = 0
+                    h[j]*=0
             else:
-                for i in np.where(mask)[0]:
-                    self.global_leaf_numbers[i, np.where(self.global_leaf_numbers[i] != 0)[0][0]] = numerator / denominator
+                for j in np.where(mask)[0]:
+                    leaf_numbers[j,i] = numerator/denominator
+                    h[j]*=numerator/denominator
+                    answer[j] = numerator/denominator
+
+                node_weights[i] = numerator/denominator
+        self.node_weights.append(node_weights)
+        return leaf_numbers, h, answer
 
 
-    def compute_antigrad(self, Y):
-        Y_ = -(2. * Y - 1.)
-        return Y_ * np.exp(-(Y_ * self.F) - np.max(Y_ * self.F))
 
 
-    def fit(self, X, Y):
+    def fit(self, X, y):
         if self.global_leaf_numbers is None:
-            self.F = first_estimator = 0
+            self.F = first_estimator = np.zeros(y.shape)
             self.estimators_list.append(first_estimator)
+            self.node_weights = list()
 
         for i in range(len(self.estimators_list), self.n_estimators):
-            antigrad = self.compute_antigrad(Y)
-            antigrad = antigrad.astype(np.float64)
+            antigrad = self._compute_antigrad(y, self.F)
             new_estimator = Carrot(max_depth = self.max_depth)
             new_estimator.fit(X, antigrad)
+
+            self.estimators_list.append(new_estimator)
             new_estimator_pred = new_estimator.predict(X)
             leaf_numbers = new_estimator.decision_path
+
+            _, _, h = self._rescale_node(y, new_estimator_pred, leaf_numbers)
+
+            self.logistic_regression = LogisticRegression()
 
             if self.global_leaf_numbers is not None:
                self.global_leaf_numbers = np.hstack((self.global_leaf_numbers, leaf_numbers))
             else:
                 self.global_leaf_numbers = leaf_numbers
 
-            self.F += self.b * new_estimator_pred
-            self.estimators_list.append(new_estimator)
 
-            logistic_regression = LogisticRegression(solver='newton-cg', max_iter=200)
-            logistic_regression.fit(self.global_leaf_numbers, Y)
-            predicted = logistic_regression.predict(self.global_leaf_numbers)
+            self.logistic_regression.fit(self.global_leaf_numbers, y)
 
-            self._update_terminal_region(Y, predicted)
-            log_out(i, self.n_estimators, predicted , Y, antigrad, new_estimator_pred)
-            self.logistic_regression = logistic_regression
-        return self.estimators_list, self.F, self.global_leaf_numbers
+            log_out(i, self.n_estimators, self.F, y, antigrad, h)
+
+            self.F +=self.b * h
+
+        return self.estimators_list, self.F, self.global_leaf_numbers, self.node_weights
 
 
     def predict(self, X):
-        pred = self.estimators_list[0]
         total_leaf_numbers = None
-        for estimator in self.estimators_list[1:]:
-            temp_pred = estimator.predict(X)
-            pred += self.b * temp_pred
+        for i, estimator in enumerate(self.estimators_list[1:]):
+            _ = estimator.predict(X)
             leaf_numbers = estimator.decision_path
+            for j in range(leaf_numbers.shape[1]):
+                mask = leaf_numbers[:, j] == 1
+                leaf_numbers[mask]*=self.node_weights[i][j]
 
             if total_leaf_numbers is not None:
                 total_leaf_numbers = np.hstack((total_leaf_numbers, leaf_numbers))
@@ -117,38 +148,53 @@ class Gradient_Boosting:
         return predict
 
 
+
+
 def unit_test():
 
     reader = DataReader()
-    X_train, Y_train = reader.get(dtype = "train", ttype = "classification")
-    X_test, Y_test = reader.get(dtype = "test", ttype = "classification")
+    X_train, Y_train = reader.get(dtype="train", ttype="classification")
+    X_test, Y_test = reader.get(dtype="test", ttype="classification")
 
     losses_my = list()
     losses_sklearn = list()
-    trees_num = [x*10 for x in range(6,10)]
+    trees_num = [x * 10 for x in range(1, 10)]
 
-    #accuracy on train
+
     estimators_list = None
     global_leaf_numbers = None
     F = None
+    node_weights = None
+    b = 0.5
+
+    ind_list = [i for i in range(len(X_train))]
+    shuffle(ind_list)
+
     for i in tqdm(trees_num):
-        algo1 = Gradient_Boosting(n_estimators=i, min_samples_split=4, max_depth=3,
-                                  estimators_list = estimators_list ,
-                                  F = F,
-                                  global_leaf_numbers = global_leaf_numbers)
-        estimators_list, F, global_leaf_numbers  = algo1.fit(X_train, Y_train)
-        acs = accuracy_score(Y_test, algo1.predict(X_test))
-        losses_my.append(acs)
-        print("my Accuracy: %.4f" % acs)
+        algo1 = Booster(n_estimators=i, min_samples_split=4, max_depth=3,
+                                  estimators_list=estimators_list,
+                                  F=F,
+                                  global_leaf_numbers=global_leaf_numbers,
+                                  node_weights= node_weights,
+                        b = b)
+        b*=0.5
+        estimators_list, F, global_leaf_numbers, node_weights = algo1.fit(X_train[ind_list, :],
+                                                                          Y_train[ind_list])
+
+
+
+        aloss = adaboost_loss(Y_test, algo1.predict(X_test))
+        losses_my.append(aloss)
+        print("\nmy AdaboostLoss: %.4f" % aloss)
 
         algo = GradientBoostingClassifier(n_estimators=i,
-                                         max_depth=3,
-                                         min_samples_split=4,
-                                         loss = "exponential")
+                                          max_depth=3,
+                                          min_samples_split=4,
+                                          loss="exponential")
         algo.fit(X_train, Y_train)
-        acs = accuracy_score(Y_test, algo.predict(X_test))
-        losses_sklearn.append(acs)
-        print("sklearn Accuracy: %.4f" % acs)
+        aloss = adaboost_loss(Y_test, algo.predict(X_test))
+        losses_sklearn.append(aloss)
+        print("sklearn AdaboostLoss: %.4f" % aloss)
 
     plot_graphs(trees_num, losses_my, losses_sklearn)
 
