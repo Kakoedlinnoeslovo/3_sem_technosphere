@@ -1,6 +1,5 @@
-
-from utils import log_out, plot_graphs, DataReader, adaboost_loss
-from carrot import Carrot
+from dop.hw1.utils import log_out, plot_graphs, DataReader, adaboost_loss
+from dop.hw1.Least_Squares_Regression_Trees.carrot import Carrot
 
 from sklearn.ensemble import GradientBoostingClassifier
 import numpy as np
@@ -95,24 +94,23 @@ class Booster:
 
 
     def fit(self, X, y):
-        X_sub, y_sub = X, y
 
         if self.global_leaf_numbers is None:
-            self.F = first_estimator = np.zeros(y_sub.shape)
+            self.F = first_estimator = np.zeros(y.shape)
             self.estimators_list.append(first_estimator)
             self.node_weights = list()
 
         for i in range(len(self.estimators_list), self.n_estimators):
 
-            antigrad = self._compute_antigrad(y_sub, self.F)
+            antigrad = self._compute_antigrad(y, self.F)
             new_estimator = Carrot(max_depth = self.max_depth)
-            new_estimator.fit(X_sub, antigrad)
+            new_estimator.fit(X, antigrad)
 
             self.estimators_list.append(new_estimator)
-            new_estimator_pred = new_estimator.predict(X_sub)
+            new_estimator_pred = new_estimator.predict(X)
             leaf_numbers = new_estimator.decision_path
 
-            _, _, h = self._rescale_node(y_sub, new_estimator_pred, leaf_numbers)
+            _, _, h = self._rescale_node(y, new_estimator_pred, leaf_numbers)
 
             self.logistic_regression = LogisticRegression()
 
@@ -122,9 +120,13 @@ class Booster:
                 self.global_leaf_numbers = leaf_numbers
 
 
-            self.logistic_regression.fit(self.global_leaf_numbers, y_sub)
+            self.logistic_regression.fit(self.global_leaf_numbers, y)
 
-            log_out(i, self.n_estimators, self.F, y_sub, antigrad, h)
+            log_out(estimator_number = i,
+                    n_estimators = self.n_estimators,
+                    pred = self.F, y = y,
+                    error_func=adaboost_loss,
+                    error_name="AdaboostLoss")
 
             self.F +=self.b * h
 
@@ -147,8 +149,6 @@ class Booster:
 
         predict = self.logistic_regression.predict(total_leaf_numbers)
         return predict
-
-
 
 
 def unit_test():

@@ -1,17 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, mean_squared_error
 from tqdm import tqdm
 import sys
 
 
 class DataReader:
     def __init__(self):
-        self.rf_train = 'data/reg.train.txt'
-        self.rf_test = 'data/reg.test.txt'
+        self.rf_train = './dop/hw1/data/reg.train.txt'
+        self.rf_test = './dop/hw1/data/reg.test.txt'
 
-        self.cf_train = 'data/spam.train.txt'
-        self.cf_test = 'data/spam.test.txt'
+        self.cf_train = '.dop/data/spam.train.txt'
+        self.cf_test = './dopdata/spam.test.txt'
 
 
     def get(self, dtype = "train", ttype = "regression"):
@@ -43,7 +42,8 @@ class DataReader:
                 print("Normalising data ...")
                 mean = X.mean(axis=0)
                 std = X.std(axis=0)
-                X = (X - mean) / std
+                eps = 0.01
+                X = (X - mean) / (std + eps)
                 return X, y
 
         if ttype == "classification":
@@ -72,12 +72,12 @@ class DataReader:
             return X, y
 
 
-def plot_graphs(trees_num, losses_my, losses_sklearn):
+def plot_graphs(trees_num, losses_my, losses_sklearn, error_name = "AdaboostLoss"):
     fig = plt.figure()
-    fig.suptitle('AdaboostLoss от n_estimators', fontsize=14, fontweight='bold')
+    fig.suptitle('{} от n_estimators'.format(error_name), fontsize=14, fontweight='bold')
     ax = fig.add_subplot(111)
     ax.set_xlabel('n_estimators')
-    ax.set_ylabel("AdaboostLoss")
+    ax.set_ylabel("{}".format(error_name))
     plt.grid()
     ax.plot(trees_num, losses_my, label="My Gradient Boosting")
     ax.plot(trees_num, losses_sklearn, label="Sklearn")
@@ -93,7 +93,34 @@ def adaboost_loss(y_pred, y):
     return np.mean(np.exp(- y_pred * y))
 
 
-def log_out(i, n_estimators, current_predict, Y, antigrad, y_pred_reg):
-    sys.stderr.write('\rLearning estimator number: ' + str(i) + "/" + str(n_estimators) \
-                     + "; AdaboostLoss error on train dataset: " + str(adaboost_loss(current_predict, Y)) \
-                 + "; MSE error on train dataset: {}".format(mean_squared_error(antigrad, y_pred_reg)))
+def log_out(estimator_number, n_estimators, pred, y, error_func, error_name = "AdaboostLoss"):
+    sys.stderr.write('\rLearning estimator number: ' + str(estimator_number) + "/" + str(n_estimators) \
+                     + "; {} error on train dataset: ".format(error_name) + str(error_func(pred, y)))
+
+
+
+def find_best_split(X, y, col):
+    sorted_indexes = np.argsort(X[:, col])
+    N = len(y)
+    S = np.sum(y)
+    Sr = S
+    Nr = N
+    Sl = 0
+    Nl = 0
+    BestTillNow = 0
+    BestCutPoint = 0
+    y_sorted = y[sorted_indexes]
+    X_sorted = X[sorted_indexes]
+
+    for i in range(N - 1):
+        Sl = Sl + y_sorted[i]
+        Sr = Sr - y_sorted[i]
+        Nl+=1
+        Nr-=1
+        if X_sorted[i+1, col] > X_sorted[i, col]:
+            NewSplitValue = float(Sl**2)/Nl + float(Sr**2)/Nr
+            if NewSplitValue > BestTillNow:
+                BestTillNow = NewSplitValue
+                BestCutPoint = float(X_sorted[i+1, col] + X_sorted[i, col]) /2
+
+    return BestCutPoint, BestTillNow

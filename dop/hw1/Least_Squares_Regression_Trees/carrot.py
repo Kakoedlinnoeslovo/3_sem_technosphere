@@ -1,10 +1,12 @@
+from dop.hw1.utils import DataReader
+from dop.hw1.utils import find_best_split
+
 import numpy as np
 from tqdm import tqdm
 from sklearn.metrics import mean_squared_error as mse
 from sklearn.tree import DecisionTreeRegressor
 import matplotlib.pyplot as plt
 
-from utils import DataReader
 
 class Carrot:
     def __init__(self, max_depth, min_samples_split = 2, min_samples_leaf = 1):
@@ -28,34 +30,6 @@ class Carrot:
         self.decision_path = None
 
 
-    @staticmethod
-    def find_best_split(X, y, col):
-        sorted_indexes = np.argsort(X[:, col])
-        N = len(y)
-        S = np.sum(y)
-        Sr = S
-        Nr = N
-        Sl = 0
-        Nl = 0
-        BestTillNow = 0
-        BestCutPoint = 0
-        y_sorted = y[sorted_indexes]
-        X_sorted = X[sorted_indexes]
-
-        for i in range(N - 1):
-            Sl = Sl + y_sorted[i]
-            Sr = Sr - y_sorted[i]
-            Nl+=1
-            Nr-=1
-            if X_sorted[i+1, col] > X_sorted[i, col]:
-                NewSplitValue = float(Sl**2)/Nl + float(Sr**2)/Nr
-                if NewSplitValue > BestTillNow:
-                    BestTillNow = NewSplitValue
-                    BestCutPoint = float(X_sorted[i+1, col] + X_sorted[i, col]) /2
-
-        return BestCutPoint, BestTillNow
-
-
     def fit(self, X, y):
         N = len(y)
         mu = np.mean(y)
@@ -64,7 +38,7 @@ class Carrot:
         Col = None
 
         for col in range(X.shape[1]):
-            BestCutPoint, Err_lr = self.find_best_split(X, y, col)
+            BestCutPoint, Err_lr = find_best_split(X, y, col)
             if (Err_lr > Err):
                 Err = Err_lr
                 CutPoint = BestCutPoint
@@ -128,9 +102,6 @@ class Carrot:
         return predictions
 
 
-
-
-
 def unit_test():
     reader = DataReader()
     X_train, y_train = reader.get(dtype = "train", ttype = "regression")
@@ -145,18 +116,18 @@ def unit_test():
         tree.fit(X_train, y_train)
         y_pred  = tree.predict(X_train)
 
-        print("MSE on Train dataset is : {}".format(mse(y_train, y_pred)))
+        print("\nMy MSE on Train dataset is : {}".format(mse(y_train, y_pred)))
         y_pred  = tree.predict(X_test)
-        print("MSE on Test dataset is : {}".format(mse(y_test, y_pred)))
+        print("My MSE on Test dataset is : {}".format(mse(y_test, y_pred)))
 
         loss_list_my.append(mse(y_test, y_pred))
 
         tree = DecisionTreeRegressor(max_depth=depth)
         tree.fit(X_train, y_train)
         y_pred = tree.predict(X_train)
-        print("MSE on Train dataset is : {}".format(mse(y_train, y_pred)))
+        print("Sklearn MSE on Train dataset is : {}".format(mse(y_train, y_pred)))
         y_pred = tree.predict(X_test)
-        print("MSE on Test dataset is : {}".format(mse(y_test, y_pred)))
+        print("Sklearn MSE on Test dataset is : {}".format(mse(y_test, y_pred)))
 
         loss_list_sklearn.append(mse(y_test, y_pred))
 
