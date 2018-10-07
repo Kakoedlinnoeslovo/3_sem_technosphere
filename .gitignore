@@ -2,3 +2,7 @@
 .idea/
 *.pyc
 .ipynb_checkpoints/
+.gradle/
+build/
+*.iml
+*~
