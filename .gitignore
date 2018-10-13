@@ -6,3 +6,13 @@
 build/
 *.iml
 *~
+
+info/TextRelevance/__pycache__/
+info/TextRelevance/code/
+info/TextRelevance/content/
+info/TextRelevance/data/
+info/TextRelevance/notebooks/
+info/TextRelevance/py-googletrans/
+info/TextRelevance/subs/
+info/TextRelevance/temp/
+info/TextRelevance/test_code/

@@ -1,0 +1,9 @@
+__pycache__/
+code/
+content/
+notebooks/
+py-googletrans/
+subs/
+temp/
+test_code/
+
