@@ -86,7 +86,7 @@ class BM25:
         else:
             CF = self.invidx.get_cf(term)
 
-        rIDF = - np.log(DF/D) + np.log(1 - np.exp(- CF/D))
+        rIDF = - np.log(DF/D) + np.log(1 - np.exp(- CF/D)) + 10
 
         #rIDF = np.log( 1 - np.exp(-1.5 * CF/D) ) + 1
         return rIDF
