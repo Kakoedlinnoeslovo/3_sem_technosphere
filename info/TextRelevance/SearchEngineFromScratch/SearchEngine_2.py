@@ -96,11 +96,11 @@ def fit_on_submission_docs_bigrams_description():
     submission_to_file(sub_dict = sub_dict, sample_sub = sample_submission)
 
 
-def fit_on_submission_docs_bigrams_keywords():
+def fit_on_submission_docs_bigrams_whole():
     # lb 0.49011 0.24796
     sub_dict = dict()
     bm25 = BM25(metric="bm25", qf=1, r=0, k1=1.2, k2=100, b=1/350, R=0.0, fixed_corpus=False, bigram=True)
-    reader = Reader(model = bm25, fit_online = True, fit_corpus="keywords")
+    reader = Reader(model = bm25, fit_online = True, fit_corpus="whole")
     reader.read_docs(iscorpus=False, isothers = True, others_list=["title"])
 
     queries_list = reader.read_queries()
