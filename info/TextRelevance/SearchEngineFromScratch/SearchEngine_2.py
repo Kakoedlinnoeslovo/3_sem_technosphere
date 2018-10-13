@@ -118,7 +118,7 @@ def fit_on_submission_docs_bigrams_whole():
 
         query_dict = dict()
 
-        scaler = np.max(query_dict_single) / np.max(query_dict_bigram)
+        scaler = np.max(list(query_dict_single.values())) / np.max(list(query_dict_bigram.values()))
 
         for docid in temp_docidxes:
             query_dict[docid] = query_dict_single[docid] + scaler * query_dict_bigram[docid]
