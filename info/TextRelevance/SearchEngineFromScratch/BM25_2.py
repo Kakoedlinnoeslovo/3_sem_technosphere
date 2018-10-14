@@ -48,6 +48,8 @@ class BM25:
         self.doclen.add(doc_len=len(doc), docid = docid)
         self.tot_docs +=1
         for position, term in enumerate(doc):
+            if len(term) == 1:
+                continue
             if self.bigram:
                 self.invidx.add_extra(term, docid, position)
             else:
@@ -78,18 +80,22 @@ class BM25:
 
 
     def _residual_idf(self, term):
-        D = self.tot_docs
-        DF = len(self.invidx.get_term_docs(term))
+        #D = self.tot_docs
+        #DF = len(self.invidx.get_term_docs(term))
 
         if self.bigram:
             CF = self.invidx.get_cf_extra(term)
+            TotLemms = self.invidx.get_tot_lemms_extra()
+            ICF = - np.log(CF / TotLemms)
         else:
             CF = self.invidx.get_cf(term)
+            TotLemms = self.invidx.get_tot_lemms()
+            ICF = - np.log(CF / TotLemms)
 
-        rIDF = - np.log(DF/D) + np.log(1 - np.exp(- CF/D)) + 10
+        #rIDF = - np.log(DF/D) #+ np.log(1 - np.exp(- CF/D)) + 10
 
         #rIDF = np.log( 1 - np.exp(-1.5 * CF/D) ) + 1
-        return rIDF
+        return ICF
 
 
     def _bm25_score(self, term, docid):

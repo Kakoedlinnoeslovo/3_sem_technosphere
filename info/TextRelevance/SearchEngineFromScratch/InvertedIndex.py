@@ -4,6 +4,7 @@ import numpy as np
 class InvertedIndex:
     def __init__(self):
         self.index = dict()
+        self.tot_lemms  = None
 
     def add(self, term, docid):
         if term in self.index:
@@ -60,6 +61,28 @@ class InvertedIndex:
         else:
             cf = 0
         return cf
+
+
+    def get_tot_lemms(self):
+        suma = 0
+        if self.tot_lemms is None:
+            for term in self.index.keys():
+                suma += np.sum([x for x in self.index[term].values()])
+            self.tot_lemms = suma
+            return self.tot_lemms
+        else:
+            return self.tot_lemms
+
+
+    def get_tot_lemms_extra(self):
+        suma = 0
+        if self.tot_lemms is None:
+            for term in self.index.keys():
+                suma += np.sum([x[0] for x in self.index[term].values()])
+            self.tot_lemms = suma
+            return self.tot_lemms
+        else:
+            return self.tot_lemms
 
     def get_cf(self, term):
         if term in self.index:
