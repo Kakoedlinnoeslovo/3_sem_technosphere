@@ -22,17 +22,22 @@ class DocIterator(object):
 
 queries = reader.read_queries()
 
-it = DocIterator( list(whole_dict.values()), list(whole_dict.keys()))
+queries_labels = ["QRY_{}".format(i) for i in range(len(queries))]
+
+it = DocIterator( list(whole_dict.values()) + queries, list(whole_dict.keys()) + queries_labels)
 
 #train doc2vec model
-model = gsm.Doc2Vec(size=300,
-                    window=10,
-                    min_count=1,
-                    workers=11,
-                    alpha=0.025,
-                    min_alpha=0.025) # use fixed learning rate
+
+model = gsm.Doc2Vec(size=300, window=10, min_count=5, workers=11,alpha=0.025, min_alpha=0.025) # use fixed learning rate
+
 model.build_vocab(it)
-model.train(it, total_examples= len(list(whole_dict.keys())), epochs=100)
+
+
+for epoch in range(10):
+    model.train(it)
+    model.alpha -= 0.002 # decrease the learning rate
+    model.min_alpha = model.alpha # fix the learning rate, no deca
+    model.train(it)
 
 
 model.save("../temp/doc2vec_title_dict.model")
