@@ -52,7 +52,15 @@ class Reader:
             #'links', 'title', 'body', 'h1', 'h2', 'h3', 'keywords', 'description'
             for field in DOCITEM_FIELDS[1:]:
                 temp_text_list = getattr(temp_docitem, field)
-                words_list += temp_text_list
+                temp_text_list_new = list()
+                
+                for word in temp_text_list:
+                    if len(word) == 1:
+                        continue
+                    else:
+                        temp_text_list_new.append(word)
+
+                words_list += temp_text_list_new
 
             if iscorpus:
                 corpus_dict[temp_docitem.doc_url] = words_list
@@ -61,7 +69,11 @@ class Reader:
                 if self.fit_corpus == "whole":
                     self.model.add_doc(doc = words_list, docid = temp_docitem.doc_url)
                 else:
-                    self.model.add_doc(doc = getattr(temp_docitem, self.fit_corpus), docid = temp_docitem.doc_url)
+                    temp_list = getattr(temp_docitem, self.fit_corpus)
+                    temp_short_body = getattr(temp_docitem, "body")[:50]
+                    temp_short_links = getattr(temp_docitem, "links")[:10]
+                    temp_list += temp_short_body + temp_short_links
+                    self.model.add_doc(doc = temp_list, docid = temp_docitem.doc_url)
 
             if isothers:
                 if "links" in others_list:
