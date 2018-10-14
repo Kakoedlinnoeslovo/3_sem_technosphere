@@ -41,7 +41,7 @@ for epoch in range(10):
     model.train(it)
     model.alpha -= 0.002 # decrease the learning rate
     model.min_alpha = model.alpha # fix the learning rate, no deca
-    model.train(it)
+    model.train(it, total_examples= len(tot_labels))
 
 
 model.save("../temp/doc2vec_title_dict.model")
