@@ -32,7 +32,7 @@ model = gsm.Doc2Vec(size=300,
                     alpha=0.025,
                     min_alpha=0.025) # use fixed learning rate
 model.build_vocab(it)
-model.train(it, total_examples= len(list(reader.title_dict.keys())), epochs=100)
+model.train(it, total_examples= len(list(whole_dict.keys())), epochs=100)
 
 
 model.save("../temp/doc2vec_title_dict.model")
