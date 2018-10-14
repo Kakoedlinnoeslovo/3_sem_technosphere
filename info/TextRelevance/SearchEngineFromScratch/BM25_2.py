@@ -227,9 +227,9 @@ class BM25:
         if term in title:
             title_addition = self.w_title_single * title_weight
 
-        #tf = (f * (self.k1 + 1) / (K + f)) + title_addition
+        tf = (f * (self.k1 + 1) / (K + f)) + title_addition
 
-        tf = f / (f + 1  + 1/350 * float(dl)) + title_addition
+        #tf = f / (f + 1  + 1/350 * float(dl)) + title_addition
 
         #third = self.qf * (self.k1 + 1) / (self.k2 + self.qf)
         return idf * tf #* third
