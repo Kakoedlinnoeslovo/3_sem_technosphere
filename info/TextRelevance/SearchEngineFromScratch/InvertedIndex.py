@@ -6,38 +6,45 @@ class InvertedIndex:
         self.index = dict()
         self.tot_lemms  = None
 
+
     def add(self, term, docid):
-        if term in self.index:
-            if docid in self.index[term]:
-                self.index[term][docid] += 1
+        term_hash  = abs(hash(term)) % (10 ** 8)
+
+        if term_hash in self.index:
+            if docid in self.index[term_hash]:
+                self.index[term_hash][docid] += 1
             else:
-                self.index[term][docid] = 1
+                self.index[term_hash][docid] = 1
         else:
             d = dict()
             d[docid] = 1
-            self.index[term] = d
+            self.index[term_hash] = d
+
 
     def add_extra(self, term, docid, position):
         #invindex[term] =
         # {"docid1": (count1, [position1, position2, ..., positionN]), ...,
         #           "docidN": ([countN], [pos1,]}
+        term_hash = abs(hash(term)) % (10 ** 8)
 
-        if term in self.index:
-            if docid in self.index[term]:
-                self.index[term][docid][0] += 1
-                self.index[term][docid][1].append(position)
+        if term_hash in self.index:
+            if docid in self.index[term_hash]:
+                self.index[term_hash][docid][0] += 1
+                self.index[term_hash][docid][1].append(position)
             else:
-                self.index[term][docid] = [1, [position]]
+                self.index[term_hash][docid] = [1, [position]]
         else:
             d = dict()
             d[docid] = [1, [position]]
-            self.index[term] = d
+            self.index[term_hash] = d
 
 
     def get_term_occurances(self, term, docid):
-        if term in self.index:
-            if docid in self.index[term]:
-                return self.index[term][docid]
+        term_hash = abs(hash(term)) % (10 ** 8)
+
+        if term_hash in self.index:
+            if docid in self.index[term_hash]:
+                return self.index[term_hash][docid]
             else:
                 #print("docid {} does not exists".format(docid))
                 return 0
@@ -47,27 +54,33 @@ class InvertedIndex:
 
 
     def get_term_occurancies_extra(self, term, docid):
-        if term in self.index:
-            if docid in self.index[term]:
-                return self.index[term][docid][0]
+        term_hash = abs(hash(term)) % (10 ** 8)
+
+        if term_hash in self.index:
+            if docid in self.index[term_hash]:
+                return self.index[term_hash][docid][0]
             else:
                 return 0
         else:
             return 0
 
     def get_cf_extra(self, term):
-        if term in self.index:
-            cf = np.sum([x[0] for x in self.index[term].values()])
+        term_hash = abs(hash(term)) % (10 ** 8)
+
+        if term_hash in self.index:
+            cf = np.sum([x[0] for x in self.index[term_hash].values()])
         else:
             cf = 0
         return cf
 
 
     def get_tot_lemms(self):
+
         suma = 0
+
         if self.tot_lemms is None:
-            for term in self.index.keys():
-                suma += np.sum([x for x in self.index[term].values()])
+            for term_hash in self.index.keys():
+                suma += np.sum([x for x in self.index[term_hash].values()])
             self.tot_lemms = suma
             return self.tot_lemms
         else:
@@ -76,25 +89,31 @@ class InvertedIndex:
 
     def get_tot_lemms_extra(self):
         suma = 0
+
         if self.tot_lemms is None:
-            for term in self.index.keys():
-                suma += np.sum([x[0] for x in self.index[term].values()])
+            for term_hash in self.index.keys():
+                suma += np.sum([x[0] for x in self.index[term_hash].values()])
             self.tot_lemms = suma
             return self.tot_lemms
         else:
             return self.tot_lemms
 
     def get_cf(self, term):
-        if term in self.index:
-            cf = np.sum([x for x in self.index[term].values()])
+        term_hash = abs(hash(term)) % (10 ** 8)
+
+        if term_hash in self.index:
+            cf = np.sum([x for x in self.index[term_hash].values()])
         else:
             cf = 0
         return cf
 
+
     def get_term_positions(self, term, docid):
-        if term in self.index:
-            if docid in self.index[term]:
-                return self.index[term][docid][1]
+        term_hash = abs(hash(term)) % (10 ** 8)
+
+        if term_hash in self.index:
+            if docid in self.index[term_hash]:
+                return self.index[term_hash][docid][1]
             else:
                 return []
         else:
@@ -102,8 +121,10 @@ class InvertedIndex:
 
 
     def get_term_docs(self, term):
-        if term in self.index:
-            return list(self.index[term].keys())
+        term_hash = abs(hash(term)) % (10 ** 8)
+
+        if term_hash in self.index:
+            return list(self.index[term_hash].keys())
         else:
             #print("term {} does not exists".format(term))
             return list()
