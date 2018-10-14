@@ -36,8 +36,29 @@ def fit_on_submission_docs_bigrams():
     # 0.56429 0.28687 ICF
 
     sub_dict = dict()
-    bm25 = BM25(metric="bm25", qf=1, r=0, k1=12, k2=100, b=0.75, R=0.0, fixed_corpus=False, bigram=True)
-    reader = Reader(model = bm25, fit_online = True, fit_corpus="whole")
+    bm25 = BM25(metric="bm25",
+                qf=1,
+                r=0,
+                k1=1.2,
+                k2=100,
+                b=0.75,
+                R=0.0,
+                fixed_corpus=False,
+                bigram=True,
+
+                w_all_words=0.2,
+                w_missed=0.3,
+                w_phrase=0.05,
+                w_right_order=1,
+                w_wrong_order=0.5,
+                w_right_order_next=0.5,
+                w_wrong_order_next=0.5,
+                w_position=0.5,
+                w_title_single=0.5,
+                w_title_bigram=0.5,
+                w_tf_idf_bigram=0.3
+                )
+    reader = Reader(model = bm25, fit_online = True, fit_corpus="title")
     reader.read_docs(iscorpus=False, isothers = True, others_list=["title"])
 
     queries_list = reader.read_queries()
@@ -54,10 +75,10 @@ def fit_on_submission_docs_bigrams():
         query_dict_bigram = reader.model.get_score_bigram(query, temp_docidxes, temp_title_dict, title_weight = 1.6)
 
         query_dict = dict()
-        scaler = (1 + np.max(list(query_dict_single.values()))) / (np.max(list(query_dict_bigram.values())) + 1)
+        #scaler = (1 + np.max(list(query_dict_single.values()))) / (np.max(list(query_dict_bigram.values())) + 1)
 
         for docid in temp_docidxes:
-            query_dict[docid] = query_dict_single[docid] + 3 * scaler * query_dict_bigram[docid]
+            query_dict[docid] = query_dict_single[docid] + query_dict_bigram[docid]
 
 
         top_docidex = bm25.get_top(query_dict = query_dict, top_k = 10)

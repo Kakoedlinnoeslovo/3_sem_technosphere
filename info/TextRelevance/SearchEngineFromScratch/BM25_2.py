@@ -7,7 +7,19 @@ import time
 
 class BM25:
     def __init__(self, corpus = None, docidxs = None, metric = "bm25",
-                 qf = 1, r = 0, k1 = 1.2, k2 = 100, b = 0.75, R = 0.0, fixed_corpus = False, bigram = False):
+                 qf = 1, r = 0, k1 = 1.2, k2 = 100, b = 0.75, R = 0.0, fixed_corpus = False, bigram = False,
+                 w_all_words = 0.2,
+                 w_missed=0.03,
+                 w_phrase=0.05,
+                 w_right_order = 1,
+                 w_wrong_order = 0.5,
+                 w_right_order_next = 0.5,
+                 w_wrong_order_next = 0.5,
+                 w_position = 0.5,
+                 w_title_single = 0.5,
+                 w_title_bigram = 0.5,
+                 w_tf_idf_bigram = 0.3):
+
         self.bm25_table = None
         self.fixed_corpus = fixed_corpus
         if corpus is None:
@@ -15,6 +27,7 @@ class BM25:
         assert isinstance(corpus, list)
         self.tot_docs = len(corpus)
         self.bigram = bigram
+
 
 
         if len(corpus) != 0:
@@ -38,6 +51,17 @@ class BM25:
         self.k2 = k2
         self.b = b
         self.R = R
+        self.w_all_words = w_all_words
+        self.w_missed = w_missed
+        self.w_phrase = w_phrase
+        self.w_right_order = w_right_order
+        self.w_wrong_order = w_wrong_order
+        self.w_right_order_next = w_right_order_next
+        self.w_wrong_order_next = w_wrong_order_next
+        self.w_position = w_position
+        self.w_title_single = w_title_single
+        self.w_title_bigram = w_title_bigram
+        self.w_tf_idf_bigram = w_tf_idf_bigram
 
 
     def add_doc(self, doc, docid):
@@ -118,7 +142,7 @@ class BM25:
         third = self.qf * (self.k1 + 1) / (self.k2 + self.qf)
         return idf * tf * third
 
-
+    #old, don't use
     def get_score(self, query, docs_list = None, docidxes = None):
         assert isinstance(query, list)
         if docs_list is None:
@@ -170,7 +194,6 @@ class BM25:
         return query_dict
 
 
-
     def get_top(self, query_dict, top_k = 10):
         sorted_keys = sorted(query_dict, key = query_dict.get, reverse = True)
 
@@ -202,7 +225,7 @@ class BM25:
         title_addition = 0
 
         if term in title:
-            title_addition = 0.2 * title_weight
+            title_addition = self.w_title_single * title_weight
 
         tf = (f * (self.k1 + 1) / (K + f)) + title_addition
 
@@ -211,6 +234,7 @@ class BM25:
 
 
     def get_score_single(self, query, docidxes, title_dict, title_weight):
+
         assert isinstance(query, list)
         assert isinstance(docidxes, list)
         assert isinstance(title_dict, dict)
@@ -234,10 +258,10 @@ class BM25:
                 else:
                     N_MISSED[docid] += 1
         for docid in docidxes:
-            query_dict[docid] += 0.2 * WALL_WORDS_ADDITION[docid] * 0.03 ** N_MISSED[docid]
+            query_dict[docid] += self.w_all_words * WALL_WORDS_ADDITION[docid] * self.w_missed ** N_MISSED[docid]
             if N_MISSED[docid] == 0:
                 #Wphrase
-                query_dict[docid] += 0.1 *  WALL_WORDS_ADDITION[docid] * 1/2
+                query_dict[docid] += self.w_phrase * WALL_WORDS_ADDITION[docid]
 
         return query_dict
 
@@ -250,21 +274,24 @@ class BM25:
         for i, pos1 in enumerate(positions1):
             temp_array = np.array(positions2) - pos1
 
-            temp_tf_right_order = len(temp_array[temp_array == 1]) * 1 + 0.5 ** i
-            temp_tf_wrong_order = len(temp_array[temp_array == - 1]) * 0.5 + 0.5 ** i
+            temp_tf_right_order = len(temp_array[temp_array == 1]) * self.w_right_order + self.w_position ** i
+            temp_tf_wrong_order = len(temp_array[temp_array == - 1]) * self.w_wrong_order + self.w_position ** i
 
-            temp_tf_right_order_next = len(temp_array[temp_array == 2]) * 0.5 + 0.5 ** i
-            temp_tf_wrong_order_next = len(temp_array[temp_array == -2]) * 0.5 + 0.5 ** i
+            temp_tf_right_order_next = len(temp_array[temp_array == 2]) * self.w_right_order_next + \
+                                       self.w_position ** i
+
+            temp_tf_wrong_order_next = len(temp_array[temp_array == -2]) * self.w_wrong_order_next + \
+                                       self.w_position ** i
 
             temp_tf = temp_tf_right_order + temp_tf_wrong_order + temp_tf_right_order_next + temp_tf_wrong_order_next
             tf+=temp_tf
 
 
-        tf = tf / (tf +1)
+        tf = tf / (tf + 1)
         title_str = " ".join(x for x in title)
 
         if term1 + " " + term2 in title_str:
-            tf += 0.5 * title_weight
+            tf += self.w_title_bigram * title_weight
 
         return tf
 
@@ -295,7 +322,7 @@ class BM25:
                 if docid in docidxes:
                     tf = self._get_bigram_tf(term1, term2, positions1, positions2, title_dict[docid], title_weight)
                     idf = self._residual_idf(term1) + self._residual_idf(term2)
-                    query_dict[docid] += 0.3 * idf * tf
+                    query_dict[docid] += self.w_tf_idf_bigram * idf * tf
 
 
         return query_dict

@@ -54,6 +54,7 @@ m=gsm.Doc2Vec.load(model)
 print("model is loaded")
 
 
+
 #path to test files
 #new_test = ["мультивиза", "в", "израиль", "какие", "страны", "можно", "посетить", "виза", "многократная"]
 #new_test = "жировики на спине можно ли применить пиявки".split()
