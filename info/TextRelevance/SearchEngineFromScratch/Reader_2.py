@@ -46,6 +46,7 @@ class Reader:
 
 
         print("Start reading {} docs".format(len(all_data)))
+
         for b in tqdm(all_data):
             temp_docitem = DocItem(int(b.split('\t')[0]), *self._parse_second(b))
             words_list = []
@@ -70,10 +71,10 @@ class Reader:
                     self.model.add_doc(doc = words_list, docid = temp_docitem.doc_url)
                 else:
                     temp_list = getattr(temp_docitem, self.fit_corpus)
-                    # temp_short_body = getattr(temp_docitem, "body")[:90]
-                    # temp_short_links = getattr(temp_docitem, "links")[:10]
-                    # temp_short_description = getattr(temp_docitem, "description")[:10]
-                    # temp_list += temp_short_body + temp_short_links + temp_short_description
+                    temp_short_body = getattr(temp_docitem, "body")[:200]
+                    #temp_short_links = getattr(temp_docitem, "links")[:10]
+                    temp_short_description = getattr(temp_docitem, "description")
+                    temp_list += temp_short_body + temp_short_description
                     self.model.add_doc(doc = temp_list, docid = temp_docitem.doc_url)
 
             if isothers:
