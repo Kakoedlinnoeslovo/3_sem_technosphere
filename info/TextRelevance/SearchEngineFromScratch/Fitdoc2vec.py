@@ -24,7 +24,11 @@ queries = reader.read_queries()
 
 queries_labels = ["QRY_{}".format(i) for i in range(len(queries))]
 
-it = DocIterator( list(whole_dict.values()) + queries, list(whole_dict.keys()) + queries_labels)
+
+tot_corpus = list(whole_dict.values()) + queries
+tot_labels = list(whole_dict.keys()) + queries_labels
+
+it = DocIterator( tot_corpus, tot_labels)
 
 #train doc2vec model
 
