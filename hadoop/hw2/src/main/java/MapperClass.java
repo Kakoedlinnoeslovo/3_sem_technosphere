@@ -28,7 +28,8 @@ public class MapperClass extends Mapper <LongWritable, Text, Text, IntWritable>
         String[] idUrl = line.split("\t");
         int id = Integer.valueOf(idUrl[0]);
         String url = idUrl[1];
-        System.out.println(url);
+
+        context.write(new Text("U" + url), new IntWritable(id));
 
     }
 }
