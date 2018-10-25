@@ -38,7 +38,6 @@ public class Run extends Configured implements Tool {
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
-
         return job;
     }
 
