@@ -12,7 +12,7 @@ import org.apache.hadoop.util.ToolRunner;
 import javax.xml.soap.Text;
 import java.io.IOException;
 
-public class RunJob extends Configured implements Tool {
+public class Run extends Configured implements Tool {
     public int run (String[] args) throws Exception{
         Job job = GetJobConf(getConf(), args[0], args[1]);
         return job.waitForCompletion(true) ? 0 : 1;
@@ -21,8 +21,8 @@ public class RunJob extends Configured implements Tool {
     private static Job GetJobConf(Configuration conf, String input, String output)
             throws IOException{
         Job job = Job.getInstance(conf);
-        job.setJarByClass(RunJob.class);
-        job.setJobName(RunJob.class.getCanonicalName());
+        job.setJarByClass(Run.class);
+        job.setJobName(Run.class.getCanonicalName());
 
         FileInputFormat.setInputPaths(job, new Path(input));
         FileOutputFormat.setOutputPath(job, new Path(output));
@@ -37,7 +37,7 @@ public class RunJob extends Configured implements Tool {
     }
 
     public static void main(String[] args) throws Exception {
-        int exitCode = ToolRunner.run(new RunJob(), args);
+        int exitCode = ToolRunner.run(new Run(), args);
         System.exit(exitCode);
     }
 
