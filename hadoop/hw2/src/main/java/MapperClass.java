@@ -24,9 +24,13 @@ public class MapperClass extends Mapper <LongWritable, Text, Text, IntWritable>
     protected void map(LongWritable offset, Text data, Context context)
         throws  IOException, InterruptedException
     {
-        System.out.println("I AM HERE!");
         String line = data.toString();
-        //log.info("Map line "+ line);
+        System.out.println(line);
+        String[] idContent = line.split("\t");
+        int id = Integer.valueOf(idContent[0]);
+        String content = idContent[1];
+        System.out.println(content);
+
     }
 }
 
