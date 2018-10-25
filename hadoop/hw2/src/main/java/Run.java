@@ -13,6 +13,8 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.hadoop.mapred.JobConf;
 
 
+
+
 import javax.xml.soap.Text;
 import java.io.IOException;
 
@@ -31,11 +33,11 @@ public class Run extends Configured implements Tool {
         Path inputPath = new Path(input);
 
         MultipleInputs.addInputPath(job, inputPath,
-                TextInputFormat.class, MapperClass.class);
+                TextInputFormat.class, MapperClass.GraphBuilderMapper.class);
 
         FileOutputFormat.setOutputPath(job, new Path(output));
 
-        job.setMapperClass(MapperClass.class);
+        job.setMapperClass(MapperClass.GraphBuilderMapper.class);
         job.setReducerClass(ReducerClass.class);
 
         job.setOutputKeyClass(Text.class);
