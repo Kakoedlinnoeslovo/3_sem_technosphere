@@ -26,9 +26,9 @@ public class MapperClass extends Mapper <LongWritable, Text, Text, IntWritable>
     {
         String line = data.toString();
         String[] idContent = line.split("\t");
-        int id = Integer.valueOf(idContent[0]);
+//        int id = Integer.valueOf(idContent[0]);
 //        String content = idContent[1];
-//        System.out.println(content);
+         System.out.println(idContent);
 
     }
 }
