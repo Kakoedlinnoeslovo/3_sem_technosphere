@@ -27,6 +27,7 @@ public class MapperClass extends Mapper <LongWritable, Text, Text, IntWritable>
 
         String line = data.toString();
         log.info("Map line "+ line);
+        System.out.println(line);
     }
 }
 
