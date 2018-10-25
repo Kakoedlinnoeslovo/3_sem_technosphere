@@ -11,11 +11,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.hadoop.mapred.JobConf;
-
-
-
-
-import javax.xml.soap.Text;
+import org.apache.hadoop.io.Text;
 import java.io.IOException;
 
 public class Run extends Configured implements Tool {
