@@ -25,11 +25,10 @@ public class MapperClass extends Mapper <LongWritable, Text, Text, IntWritable>
         throws  IOException, InterruptedException
     {
         String line = data.toString();
-        System.out.println(line);
         String[] idContent = line.split("\t");
-        int id = Integer.valueOf(idContent[0]);
-        String content = idContent[1];
-        System.out.println(content);
+//        int id = Integer.valueOf(idContent[0]);
+//        String content = idContent[1];
+//        System.out.println(content);
 
     }
 }
