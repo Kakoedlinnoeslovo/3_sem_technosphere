@@ -38,7 +38,7 @@ public class Run extends Configured implements Tool {
         FileOutputFormat.setOutputPath(job, new Path(output));
 
         job.setMapperClass(MapperClass.class);
-        job.setReducerClass(ReducerClass.class);
+        //job.setReducerClass(ReducerClass.class);
 
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);

@@ -20,15 +20,12 @@ public class MapperClass extends Mapper <LongWritable, Text, Text, IntWritable>
     private Text word = new Text();
 
     @Override
-    protected void map(LongWritable key, Text value, Context context)
-        throws  IOException, InterruptedException{
-        String line = value.toString();
-        StringTokenizer st = new StringTokenizer(line, " ");
+    protected void map(LongWritable offset, Text data, Context context)
+        throws  IOException, InterruptedException
+    {
 
-        while (st.hasMoreTokens()){
-            word.set(st.nextToken());
-            context.write(word, one);
-        }
+        String line = data.toString();
+        System.out.println("Map line "+ line);
     }
 }
 
