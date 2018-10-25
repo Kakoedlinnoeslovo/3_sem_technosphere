@@ -33,11 +33,11 @@ public class Run extends Configured implements Tool {
         Path inputPath = new Path(input);
 
         MultipleInputs.addInputPath(job, inputPath,
-                TextInputFormat.class, MapperClass.GraphBuilderMapper.class);
+                TextInputFormat.class, MapperClass.class);
 
         FileOutputFormat.setOutputPath(job, new Path(output));
 
-        job.setMapperClass(MapperClass.GraphBuilderMapper.class);
+        job.setMapperClass(MapperClass.class);
         job.setReducerClass(ReducerClass.class);
 
         job.setOutputKeyClass(Text.class);
