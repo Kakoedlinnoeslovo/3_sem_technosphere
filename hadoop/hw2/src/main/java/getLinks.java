@@ -32,8 +32,8 @@ class getLinks {
 
         String HTML = baos.toString("UTF-8");
 
-        LOG.fine("Original size: " + data.length()/1024 + "KB");
-        LOG.fine ("Compressed size: " + HTML.length()/1024 + "KB");
+        System.out.println("Original size: " + data.length()/1024 + "KB");
+        System.out.println ("Compressed size: " + HTML.length()/1024 + "KB");
 
 
         return result;
