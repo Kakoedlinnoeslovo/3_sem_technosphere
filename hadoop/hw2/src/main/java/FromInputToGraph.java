@@ -34,8 +34,17 @@ public class FromInputToGraph extends Configured implements Tool{
             int id = Integer.valueOf(idContent[0]);
             String content = idContent[1];
 
-            LinkedList result = getLinks.extract(content);
+            LinkedList<String> links = getLinks.extract(content);
 
+            StringBuilder sb = new StringBuilder();
+            sb.append("LINKS");
+
+            for (String l: links){
+                String temp = l + "\t";
+                sb.append(temp);
+            }
+
+            context.write(new IntWritable(id), new Text(sb.toString()));
         }
     }
 
@@ -44,7 +53,9 @@ public class FromInputToGraph extends Configured implements Tool{
 
         @Override
         protected void map(LongWritable offset, Text text, Context context){
+            String line = text.toString();
 
+            System.out.println(line);
         }
     }
 
