@@ -4,7 +4,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -17,6 +16,8 @@ import java.io.IOException;
 
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+
+import java.util.LinkedList;
 
 
 public class FromInputToGraph extends Configured implements Tool{
@@ -33,6 +34,7 @@ public class FromInputToGraph extends Configured implements Tool{
             int id = Integer.valueOf(idContent[0]);
             String content = idContent[1];
 
+            LinkedList result = getLinks.extract(content);
 
         }
     }
