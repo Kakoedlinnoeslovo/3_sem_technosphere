@@ -80,13 +80,17 @@ public class HistsInitJob extends Configured implements Tool {
 
             LinkedList <String> all = new LinkedList<>();
 
-            all.add("|FROM|");
+            all.add("|F|\t");
+            String sizeFrom = Integer.toString(from.size());
+            all.add(sizeFrom + "\t");
 
             for (String f: from){
                 all.add(f + "\t");
             }
 
-            all.add("|TO|");
+            all.add("|T|\t");
+            String sizeTo = Integer.toString(to.size());
+            all.add(sizeTo + "\t");
 
             for (String t: to){
                 all.add(t + "\t");
