@@ -18,6 +18,8 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Arrays;
 
 
 public class FromInputToGraph extends Configured implements Tool{
@@ -37,7 +39,7 @@ public class FromInputToGraph extends Configured implements Tool{
             LinkedList<String> links = getLinks.extract(content);
 
             StringBuilder sb = new StringBuilder();
-            sb.append("LINKS");
+            sb.append("L");
 
             for (String l: links){
                 String temp = l + "\t";
@@ -52,10 +54,15 @@ public class FromInputToGraph extends Configured implements Tool{
             extends Mapper <LongWritable, Text, IntWritable, Text>{
 
         @Override
-        protected void map(LongWritable offset, Text text, Context context){
+        protected void map(LongWritable offset, Text text, Context context)
+                throws InterruptedException, IOException {
             String line = text.toString();
+            String [] idUrl = line.split("\t");
+            int id = Integer.getInteger(idUrl[0]);
+            String url = idUrl[1];
 
-            System.out.println(line);
+            String textToWrite = "U" + url;
+            context.write(new IntWritable(id), new Text(textToWrite));
         }
     }
 
@@ -65,6 +72,41 @@ public class FromInputToGraph extends Configured implements Tool{
         @Override
         protected void reduce(IntWritable id, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException{
+
+            String base = null;
+            List <String> targets = null;
+            for (Text v: values) {
+
+                String val = v.toString();
+                char opcode = val.charAt(0);
+                String content = val.substring(1);
+
+                if (opcode == 'U'){
+                    base = content;
+                }
+
+                if (opcode == 'L'){
+                    targets = Arrays.asList(content.split("\t"));
+                }
+
+                else{
+                    System.out.println("Unknown prefix " + opcode);
+                }
+
+            }
+
+            if (targets != null) {
+                targets = getLinks.merge(targets, base);
+
+                StringBuilder sb = new StringBuilder();
+
+                for (String t : targets) {
+                    sb.append(t);
+                    sb.append("\t");
+                }
+
+                context.write(new Text(base), new Text(sb.toString()));
+            }
 
         }
 
@@ -81,7 +123,7 @@ public class FromInputToGraph extends Configured implements Tool{
         Path urlsPath = Constants.urlsPath;
 
         MultipleInputs.addInputPath(job, urlsPath, TextInputFormat.class, FromInputToGraphUrlsMapper.class);
-        //MultipleInputs.addInputPath(job, inputPath, TextInputFormat.class, FromInputToGraphMapper.class);
+        MultipleInputs.addInputPath(job, inputPath, TextInputFormat.class, FromInputToGraphMapper.class);
         FileOutputFormat.setOutputPath(job, outputPath);
 
         job.setMapOutputKeyClass(IntWritable.class);
