@@ -122,7 +122,7 @@ public class FromInputToGraph extends Configured implements Tool{
         Path outputPath = Constants.outputPath;
         Path urlsPath = Constants.urlsPath;
 
-        MultipleInputs.addInputPath(job, urlsPath, TextInputFormat.class, FromInputToGraphUrlsMapper.class);
+        //MultipleInputs.addInputPath(job, urlsPath, TextInputFormat.class, FromInputToGraphUrlsMapper.class);
         MultipleInputs.addInputPath(job, inputPath, TextInputFormat.class, FromInputToGraphMapper.class);
         FileOutputFormat.setOutputPath(job, outputPath);
 

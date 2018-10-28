@@ -11,10 +11,6 @@ import  java.util.logging.Logger;
 
 public class UrlsMapper extends Mapper <LongWritable, Text, Text, IntWritable>
 {
-    private static Logger log = Logger.getLogger(UrlsMapper.class.getName());
-
-    private final static IntWritable one = new IntWritable(1);
-    private Text word = new Text();
 
     @Override
     protected void map(LongWritable offset, Text data, Context context)
