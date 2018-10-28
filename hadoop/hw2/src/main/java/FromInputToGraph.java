@@ -131,7 +131,7 @@ public class FromInputToGraph extends Configured implements Tool{
         job.setOutputKeyClass(IntWritable.class);
         job.setOutputValueClass(Text.class);
 
-        job.setReducerClass(FromInputToGraphReducer.class);
+        //job.setReducerClass(FromInputToGraphReducer.class);
 
         return job;
 
