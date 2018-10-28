@@ -14,7 +14,6 @@ import org.apache.hadoop.mapreduce.Counters;
 
 import java.io.IOException;
 import org.apache.hadoop.fs.Path;
-import java.util.List;
 import java.util.LinkedList;
 
 

@@ -56,9 +56,10 @@ public class FromInputToGraph extends Configured implements Tool{
         @Override
         protected void map(LongWritable offset, Text text, Context context)
                 throws InterruptedException, IOException {
+
             String line = text.toString();
             String [] idUrl = line.split("\t");
-            int id = Integer.getInteger(idUrl[0]);
+            int id = Integer.valueOf(idUrl[0]);
             String url = idUrl[1];
 
             String textToWrite = "U" + url;
@@ -122,7 +123,7 @@ public class FromInputToGraph extends Configured implements Tool{
         Path outputPath = Constants.outputPath;
         Path urlsPath = Constants.urlsPath;
 
-        //MultipleInputs.addInputPath(job, urlsPath, TextInputFormat.class, FromInputToGraphUrlsMapper.class);
+        MultipleInputs.addInputPath(job, urlsPath, TextInputFormat.class, FromInputToGraphUrlsMapper.class);
         MultipleInputs.addInputPath(job, inputPath, TextInputFormat.class, FromInputToGraphMapper.class);
         FileOutputFormat.setOutputPath(job, outputPath);
 
@@ -131,7 +132,7 @@ public class FromInputToGraph extends Configured implements Tool{
         job.setOutputKeyClass(IntWritable.class);
         job.setOutputValueClass(Text.class);
 
-        //job.setReducerClass(FromInputToGraphReducer.class);
+        job.setReducerClass(FromInputToGraphReducer.class);
 
         return job;
 
