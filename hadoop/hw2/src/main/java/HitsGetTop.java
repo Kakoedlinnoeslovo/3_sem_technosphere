@@ -58,8 +58,8 @@ public class HitsGetTop extends Configured implements Tool {
         job.setJarByClass(HitsGetTop.class);
         job.setJobName(HitsGetTop.class.getCanonicalName());
 
-        Path inputPath = new Path(args[0]);
-        if (new Path(args[0]) == Constants.HitsOutputPath){
+        Path inputPath = new Path(args[1]);
+        if (inputPath == Constants.HitsOutputPath){
             FIRST_START = 1;
         }
         else{
