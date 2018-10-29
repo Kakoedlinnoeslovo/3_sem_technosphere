@@ -105,8 +105,8 @@ public class HistsInitJob extends Configured implements Tool {
     private static Job GetJobConf(Configuration conf) throws IOException{
         Job job = Job.getInstance(conf);
 
-        job.setJarByClass(HitsInitMapper.class);
-        job.setJobName(HitsInitMapper.class.getCanonicalName());
+        job.setJarByClass(HistsInitJob.class);
+        job.setJobName(HistsInitJob.class.getCanonicalName());
 
         Path inputPath = Constants.outputPath;
         Path outputPath = Constants.HistsOutputPath;
