@@ -89,13 +89,13 @@ public class HistsInitJob extends Configured implements Tool {
 
     }
 
-    private static Job GetJobConf(Configuration conf, String input, String outDir) throws IOException {
+    private static Job GetJobConf(Configuration conf) throws IOException {
         Job job = Job.getInstance(conf);
         job.setJarByClass(HistsInitJob.class);
         job.setJobName(HistsInitJob.class.getCanonicalName());
 
-        FileInputFormat.addInputPath(job, new Path(input));
-        FileOutputFormat.setOutputPath(job, new Path(outDir));
+        FileInputFormat.addInputPath(job, Constants.outputPath);
+        FileOutputFormat.setOutputPath(job, Constants.HistsOutputPath);
 
         job.setMapperClass(HitsInitMapper.class);
         job.setReducerClass(HitsInitReducer.class);
