@@ -28,12 +28,13 @@ public class HitsGetTop extends Configured implements Tool {
                 String dataStr = data.toString();
                 String[] dataArray = dataStr.split("\t");
                 for (String d: dataArray){
-                    if (d.substring(0, 2).equals("|F|")){
-                        System.out.println("FROM URLS is " + d.substring(2));
-                    }
-                    if (d.substring(0, 2).equals("|T|")){
-                        System.out.println("TO URLS is " + d.substring(2));
-                    }
+                    System.out.println(d.substring(0, 2));
+//                    if (d.substring(0, 2).equals("|F|")){
+//                        System.out.println("FROM URLS is " + d.substring(2));
+//                    }
+//                    if (d.substring(0, 2).equals("|T|")){
+//                        System.out.println("TO URLS is " + d.substring(2));
+//                    }
                 }
             }
 
