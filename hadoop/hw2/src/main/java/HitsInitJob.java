@@ -43,6 +43,7 @@ public class HitsInitJob extends Configured implements Tool {
         }
     }
 
+
     public static class HitsInitReducer extends Reducer<Text, Text, Text, Text> {
         @Override
         protected void reduce(Text url, Iterable<Text> values, Context context)
@@ -64,23 +65,7 @@ public class HitsInitJob extends Configured implements Tool {
                 context.getCounter("COMMON_COUNTERS", "HANGING_VERTEXES").increment(1);
             }
 
-            LinkedList<String> all = new LinkedList<>();
-
-            all.add("|F|\t");
-            String sizeFrom = Integer.toString(from.size());
-            all.add(sizeFrom + "\t");
-
-            for (String f : from) {
-                all.add(f + "\t");
-            }
-
-            all.add("|T|\t");
-            String sizeTo = Integer.toString(to.size());
-            all.add(sizeTo + "\t");
-
-            for (String t : to) {
-                all.add(t + "\t");
-            }
+            StringBuilder all = Utils.makeString(from ,to);
 
             context.write(new Text(url), new Text(all.toString()));
 
