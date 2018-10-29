@@ -55,7 +55,7 @@ public class HitsGetTop extends Configured implements Tool {
         job.setJarByClass(HitsGetTop.class);
         job.setJobName(HitsGetTop.class.getCanonicalName());
 
-        Path inputPath = Constants.HitsOutputPath);
+        Path inputPath = Constants.HitsOutputPath;
 
         Path outputPath = Constants.HitsGetTopOutputPath;
 
