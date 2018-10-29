@@ -19,7 +19,7 @@ public class HistsInitJob extends Configured implements Tool {
 
     @Override
     public int run(String[] args) throws Exception {
-        Job job = GetJobConf(getConf(), args[0], args[1]);
+        Job job = GetJobConf(getConf());
         int result = job.waitForCompletion(true) ? 0 : 1;
         Counters counters = job.getCounters();
         long hang = counters.findCounter("COMMON_COUNTERS", "HANGING_VERTEXES").getValue();
