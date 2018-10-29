@@ -18,13 +18,11 @@ public class HitsGetTop extends Configured implements Tool {
 
     LinkedList <String> from = new LinkedList<>();
     LinkedList <String> to = new LinkedList<>();
-    private static int FIRST_START = 0;
 
     static public class HitsgetTopMapper extends Mapper <LongWritable, Text, Text, Text>{
         @Override
         public final void map(LongWritable offset, Text data, Context context) throws IOException{
 
-            if (FIRST_START == 1){
                 String dataStr = data.toString();
                 String[] dataArray = dataStr.split("\t");
                 for (String d: dataArray){
@@ -38,7 +36,6 @@ public class HitsGetTop extends Configured implements Tool {
                 }
             }
 
-        }
 
 
     }
@@ -58,13 +55,8 @@ public class HitsGetTop extends Configured implements Tool {
         job.setJarByClass(HitsGetTop.class);
         job.setJobName(HitsGetTop.class.getCanonicalName());
 
-        Path inputPath = new Path(args[1]);
-        if (inputPath == Constants.HitsOutputPath){
-            FIRST_START = 1;
-        }
-        else{
-            FIRST_START = 0;
-        }
+        Path inputPath = Constants.HitsOutputPath);
+
         Path outputPath = Constants.HitsGetTopOutputPath;
 
         job.setMapperClass(HitsgetTopMapper.class);
