@@ -14,23 +14,12 @@ import org.apache.hadoop.mapreduce.Counters;
 
 import java.io.IOException;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.util.ToolRunner;
+
 import java.util.LinkedList;
 
 
 public class HistsInitJob extends Configured implements Tool {
-    @Override
-    public int run(String[] args) throws Exception{
-        Job job = GetJobConf(getConf());
-
-        int result = job.waitForCompletion(true) ? 0: 1;
-        Counters counters = job.getCounters();
-        long hang = counters.findCounter("COMMON_COUNTERS", "HANGING_VERTEXES").getValue();
-        long total = counters.findCounter("COMMON_COUNTERS", "TOTAL_VERTEXES").getValue();
-
-        System.out.println("Hanging vertexes " + hang + "/ Total vertexes "  + total);
-        return result;
-    }
-
 
     public static class HitsInitMapper extends Mapper <LongWritable, Text, Text, Text>{
 
@@ -124,5 +113,23 @@ public class HistsInitJob extends Configured implements Tool {
 
         return job;
 
+    }
+
+    @Override
+    public int run(String[] args) throws Exception{
+        Job job = GetJobConf(getConf());
+
+        int result = job.waitForCompletion(true) ? 0: 1;
+        Counters counters = job.getCounters();
+        long hang = counters.findCounter("COMMON_COUNTERS", "HANGING_VERTEXES").getValue();
+        long total = counters.findCounter("COMMON_COUNTERS", "TOTAL_VERTEXES").getValue();
+
+        System.out.println("Hanging vertexes " + hang + "/ Total vertexes "  + total);
+        return result;
+    }
+
+    public final void main(String[] args) throws Exception{
+        int ret = ToolRunner.run(new HistsInitJob(), args);
+        System.exit(ret);
     }
 }
