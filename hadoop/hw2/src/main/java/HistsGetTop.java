@@ -13,6 +13,6 @@ public class HistsGetTop {
         job.setJarByClass(HistsGetTop.class);
         job.setJobName(HistsGetTop.class.getCanonicalName());
 
-        Path
+        return job;
     }
 }
