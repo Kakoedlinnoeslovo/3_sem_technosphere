@@ -87,7 +87,7 @@ public class HitsGetTop extends Configured implements Tool {
         return job.waitForCompletion(true) ? 0 : 1;
     }
 
-    void main (String[] args) throws  Exception{
+    public static void main (String[] args) throws  Exception{
         int exitCode = ToolRunner.run(new HitsGetTop(), args);
         System.exit(exitCode);
     }
