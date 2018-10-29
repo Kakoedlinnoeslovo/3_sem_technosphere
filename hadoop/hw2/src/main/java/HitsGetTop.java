@@ -21,12 +21,13 @@ public class HitsGetTop extends Configured implements Tool {
 
     static public class HitsgetTopMapper extends Mapper <LongWritable, Text, Text, Text>{
         @Override
-        public final void map(LongWritable offset, Text data, Context context) throws IOException{
+        public final void map(LongWritable offset, Text data, Context context)
+                throws IOException{
 
                 String dataStr = data.toString();
                 String[] dataArray = dataStr.split("\t");
                 for (String d: dataArray){
-                    System.out.println(d.substring(0, 2));
+                    System.out.println(d);
 //                    if (d.substring(0, 2).equals("|F|")){
 //                        System.out.println("FROM URLS is " + d.substring(2));
 //                    }
