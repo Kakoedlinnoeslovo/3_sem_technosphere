@@ -9,15 +9,16 @@ class Utils {
         String temp = sizeFrom + "\t";
         all.append(temp);
 
+        all.append("|T|");
+        String sizeTo = Integer.toString(to.size());
+        temp = sizeTo + "\t";
+        all.append(temp);
+
         for (String f : from) {
             temp = f + "\t";
             all.append(temp);
         }
 
-        all.append("|T|");
-        String sizeTo = Integer.toString(to.size());
-        temp = sizeTo + "\t";
-        all.append(temp);
 
         for (String t : to) {
             temp = t + "\t";

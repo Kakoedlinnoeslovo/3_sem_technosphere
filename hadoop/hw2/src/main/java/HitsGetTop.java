@@ -13,27 +13,35 @@ import org.apache.hadoop.util.ToolRunner;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
 
 public class HitsGetTop extends Configured implements Tool {
 
-    LinkedList <String> from = new LinkedList<>();
-    LinkedList <String> to = new LinkedList<>();
+   static Map <String, Integer> from = new HashMap<>();
+   static  Map <String, Integer> to = new HashMap<>();
 
-    static public class HitsgetTopMapper extends Mapper <LongWritable, Text, Text, Text>{
+    static public class HitsgetTopMapperInit extends Mapper <LongWritable, Text, Text, Text>{
         @Override
         public final void map(LongWritable offset, Text data, Context context)
                 throws IOException{
 
                 String dataStr = data.toString();
+
                 String[] dataArray = dataStr.split("\t");
-                for (String d: dataArray){
-                    System.out.println(d);
-//                    if (d.substring(0, 2).equals("|F|")){
-//                        System.out.println("FROM URLS is " + d.substring(2));
-//                    }
-//                    if (d.substring(0, 2).equals("|T|")){
-//                        System.out.println("TO URLS is " + d.substring(2));
-//                    }
+                String baseUrl = dataArray[0];
+
+                System.out.println(baseUrl);
+
+                for (Integer i = 1; i< dataArray.length; i+=1){
+                    if (dataArray[i].substring(0, 2).equals("|F|")){
+                        System.out.println("FROM URLS is " + dataArray[i].substring(2));
+                        from.put(baseUrl, Integer.getInteger(dataArray[i].substring(2)));
+                    }
+                    if (dataArray[i].substring(0, 2).equals("|T|")){
+                        System.out.println("TO URLS is " + dataArray[i].substring(2));
+                        to.put(baseUrl, Integer.getInteger(dataArray[i].substring(2)));
+                    }
                 }
             }
 
@@ -60,7 +68,7 @@ public class HitsGetTop extends Configured implements Tool {
 
         Path outputPath = Constants.HitsGetTopOutputPath;
 
-        job.setMapperClass(HitsgetTopMapper.class);
+        job.setMapperClass(HitsgetTopMapperInit.class);
         //job.setReducerClass(HitsgetTopReducer.class);
 
         FileInputFormat.addInputPath(job, inputPath);
