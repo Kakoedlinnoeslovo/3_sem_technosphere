@@ -4,7 +4,7 @@ class Utils {
     public static StringBuilder makeString(LinkedList<String> from, LinkedList<String> to){
         StringBuilder all = new StringBuilder();
 
-        all.append("|F|\t");
+        all.append("|F|");
         String sizeFrom = Integer.toString(from.size());
         String temp = sizeFrom + "\t";
         all.append(temp);
@@ -14,7 +14,7 @@ class Utils {
             all.append(temp);
         }
 
-        all.append("|T|\t");
+        all.append("|T|");
         String sizeTo = Integer.toString(to.size());
         temp = sizeTo + "\t";
         all.append(temp);
