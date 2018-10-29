@@ -108,7 +108,7 @@ public class HistsInitJob extends Configured implements Tool {
         job.setJarByClass(HitsInitMapper.class);
         job.setJobName(HitsInitMapper.class.getCanonicalName());
 
-        Path inputPath = Constants.HistsInputPath;
+        Path inputPath = Constants.outputPath;
         Path outputPath = Constants.HistsOutputPath;
 
         FileInputFormat.addInputPath(job, inputPath);
