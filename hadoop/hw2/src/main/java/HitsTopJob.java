@@ -21,7 +21,7 @@ public class HitsTopJob extends Configured implements Tool {
     static Map <String, Integer> from = new HashMap<>();
     static  Map <String, Integer> to = new HashMap<>();
 
-    public static boolean SortByH = true;
+    private static boolean SortByH = true;
 
     static public class HitsIterJobMapper extends Mapper <LongWritable, Text, Text, Text>{
         @Override
@@ -91,11 +91,10 @@ public class HitsTopJob extends Configured implements Tool {
     }
 
 
-
     private static Job GetJobConf(Configuration conf) throws IOException {
         Job job = Job.getInstance(conf);
-        job.setJarByClass(HitsGetTop.class);
-        job.setJobName(HitsGetTop.class.getCanonicalName());
+        job.setJarByClass(HitsTopJob.class);
+        job.setJobName(HitsTopJob.class.getCanonicalName());
 
         Path inputPath = Constants.HitsOutputPath;
 
@@ -123,7 +122,7 @@ public class HitsTopJob extends Configured implements Tool {
     }
 
     public static void main (String[] args) throws  Exception{
-        int exitCode = ToolRunner.run(new HitsGetTop(), args);
+        int exitCode = ToolRunner.run(new HitsTopJob(), args);
         System.exit(exitCode);
     }
 }
