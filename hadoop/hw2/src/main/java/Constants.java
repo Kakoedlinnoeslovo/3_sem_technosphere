@@ -5,5 +5,6 @@ class Constants {
     static final Path urlsPath = new Path("/data/infopoisk/hits_pagerank/urls.txt");
     static final Path outputPath = new Path("out");
     static final Path HitsOutputPath = new Path("HitsInitJobOut");
-    static final Path HitsGetTopOutputPath = new Path("HitsGetTopOutput");
+
+    static final Path HitsTopOutputPath = new Path("HitsTopOutput");
 }

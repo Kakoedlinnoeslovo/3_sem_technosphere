@@ -16,10 +16,12 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 
-public class HitsIterJob extends Configured implements Tool {
+public class HitsTopJob extends Configured implements Tool {
 
     static Map <String, Integer> from = new HashMap<>();
     static  Map <String, Integer> to = new HashMap<>();
+
+    public static boolean SortByH = true;
 
     static public class HitsIterJobMapper extends Mapper <LongWritable, Text, Text, Text>{
         @Override
@@ -55,7 +57,32 @@ public class HitsIterJob extends Configured implements Tool {
 
     static public class HitsIterJobReducer extends Reducer <Text, Text, Text, Text>{
         @Override
-        public final void reduce(Text url, Iterable<Text> data, Context context){
+        public final void reduce(Text url, Iterable<Text> data, Context context)
+                throws IOException, InterruptedException{
+            String baseUrl = url.toString();
+
+            Integer scoreA = 0;
+            Integer scoreH = 0;
+
+            for (Text d: data){
+                String string_d = d.toString();
+                if (string_d.charAt(0) == 'a'){
+                    scoreA += Integer.getInteger(string_d.substring(1));
+
+                }
+                if (string_d.charAt(0) == 'h'){
+                    scoreH +=Integer.getInteger(string_d.substring(1));
+                }
+            }
+
+            if (SortByH){
+                context.write(new Text(baseUrl), new Text(scoreH.toString()));
+
+            }
+            else{
+                context.write(new Text(baseUrl), new Text(scoreA.toString()));
+            }
+
 
         }
 
@@ -63,17 +90,17 @@ public class HitsIterJob extends Configured implements Tool {
 
 
 
-    private static Job GetJobConf(Configuration conf, String[] args) throws IOException {
+    private static Job GetJobConf(Configuration conf) throws IOException {
         Job job = Job.getInstance(conf);
         job.setJarByClass(HitsGetTop.class);
         job.setJobName(HitsGetTop.class.getCanonicalName());
 
         Path inputPath = Constants.HitsOutputPath;
 
-        Path outputPath = Constants.HitsGetTopOutputPath;
+        Path outputPath = Constants.HitsTopOutputPath;
 
         job.setMapperClass(HitsIterJobMapper.class);
-        //job.setReducerClass(HitsIterJobReducer.class);
+        job.setReducerClass(HitsIterJobReducer.class);
 
         FileInputFormat.addInputPath(job, inputPath);
         FileOutputFormat.setOutputPath(job, outputPath);
@@ -89,7 +116,7 @@ public class HitsIterJob extends Configured implements Tool {
 
     @Override
     public int run(String[] args) throws Exception{
-        Job job = GetJobConf(getConf(), args);
+        Job job = GetJobConf(getConf());
         return job.waitForCompletion(true) ? 0 : 1;
     }
 

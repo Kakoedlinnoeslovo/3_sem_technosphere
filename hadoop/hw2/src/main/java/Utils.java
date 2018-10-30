@@ -5,6 +5,7 @@ class Utils {
         StringBuilder all = new StringBuilder();
 
         all.append("|F|");
+
         String sizeFrom = Integer.toString(from.size());
         String temp = sizeFrom + "\t";
         all.append(temp);
