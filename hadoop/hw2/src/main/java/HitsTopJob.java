@@ -75,6 +75,8 @@ public class HitsTopJob extends Configured implements Tool {
                 }
             }
 
+            System.out.println("SCORE H " + scoreH);
+
             if (SortByH){
                 context.write(new Text(baseUrl), new Text(scoreH.toString()));
 
