@@ -7,7 +7,7 @@ Log() {
     echo "[$( date +%c )] $*" >&2
 }
 
-OUTDIR=seminar2/out
+OUTDIR=seminar3/out
 RESFILE=temps.kml
 NREDUCERS=4
 
@@ -19,7 +19,7 @@ Log "REMOVING previous directory"
 hadoop fs -rm -r -f $OUTDIR
 
 Log "RUNNING JOB"
-hadoop jar ./build/libs/hadoop_sem2.jar SecondarySortDemo \
+hadoop jar ./build/libs/seminar3.jar SecondarySortDemo \
            -Dmapreduce.job.reduces=$NREDUCERS \
            /data/seminar2/meteo/*.gz $OUTDIR
 
