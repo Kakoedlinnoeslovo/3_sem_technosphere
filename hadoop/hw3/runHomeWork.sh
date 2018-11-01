@@ -18,7 +18,7 @@ git pull
 #echo test 1>&2 # or echo test >&2   #redirect stdout to stderr
 
 Log(){
-    echo "[$( date + %c)] $*" >&2
+    echo "[$( date +%c )] $*" >&2
 }
 
 Log "BUILDING"

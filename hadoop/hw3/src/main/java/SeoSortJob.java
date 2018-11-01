@@ -20,7 +20,7 @@ public class SeoSortJob extends Configured implements Tool {
     public int run(String[] args)
             throws Exception
     {
-        Job job = getJobConf();
+        Job job = getJobConf(getConf());
         return job.waitForCompletion(true) ? 0: 1;
     }
 
@@ -33,7 +33,7 @@ public class SeoSortJob extends Configured implements Tool {
     }
 
 
-    public static class SeoSortJobMapper extends Mapper<LongWritable, Text, TextIntPair, Text>
+    public static class SeoSortJobMapper extends Mapper<LongWritable, Text, Text, Text>
     {
 
         @Override
@@ -43,20 +43,20 @@ public class SeoSortJob extends Configured implements Tool {
     }
 
 
-    public static class SeoSortJobReducer extends Reducer <TextIntPair, Text, Text, Text>
+    public static class SeoSortJobReducer extends Reducer <Text, Text, Text, Text>
     {
         @Override
-        protected void reduce(TextIntPair key, Iterable<Text> values, Context context)
+        protected void reduce(Text key, Iterable<Text> values, Context context)
         {
 
         }
     }
 
 
-    private Job getJobConf()
+    private Job getJobConf(Configuration conf)
             throws IOException
     {
-        Job job = Job.getInstance(getConf());
+        Job job = Job.getInstance(conf);
         job.setJarByClass(SeoSortJob.class);
         job.setJobName(SeoSortJob.class.getCanonicalName());
 
@@ -68,7 +68,7 @@ public class SeoSortJob extends Configured implements Tool {
         job.setMapperClass(SeoSortJobMapper.class);
         job.setReducerClass(SeoSortJobReducer.class);
 
-        job.setMapOutputKeyClass(TextIntPair.class);
+        job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(Text.class);
 
         job.setOutputValueClass(Text.class);
