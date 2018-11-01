@@ -15,7 +15,6 @@ Log "BUILDING"
 ./gradlew jar
 
 
-
 Log "REMOVING previous directory"
 hadoop fs -rm -r -f $OUTDIR
 
