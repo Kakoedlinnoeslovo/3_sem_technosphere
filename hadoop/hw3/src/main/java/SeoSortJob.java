@@ -25,7 +25,7 @@ public class SeoSortJob extends Configured implements Tool {
     }
 
 
-    public void main(String[] args)
+    public static void main(String[] args)
             throws Exception
     {
         int result = ToolRunner.run(new SeoSortJob(), args);
