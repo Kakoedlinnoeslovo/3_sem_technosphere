@@ -33,20 +33,23 @@ public class SeoSortJob extends Configured implements Tool {
     }
 
 
-    public static class SeoSortJobMapper extends Mapper<LongWritable, Text, Text, Text>
+    public static class SeoSortJobMapper extends Mapper<LongWritable, Text, TextIntPair, Text>
     {
 
         @Override
         protected void map(LongWritable id, Text value, Context context){
 
+            String[] line = value.toString().split("\t");
+
+            System.out.println("QUERY: " + line[0] + " URL: " + line[1]);
         }
     }
 
 
-    public static class SeoSortJobReducer extends Reducer <Text, Text, Text, Text>
+    public static class SeoSortJobReducer extends Reducer <TextIntPair, Text, Text, Text>
     {
         @Override
-        protected void reduce(Text key, Iterable<Text> values, Context context)
+        protected void reduce(TextIntPair key, Iterable<Text> values, Context context)
         {
 
         }
