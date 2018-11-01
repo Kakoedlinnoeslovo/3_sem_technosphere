@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 #help set
 set -e # Exit immediately if a command exits with a non-zero status.
         #Set -e stops the execution of a script if a command or pipeline has an error
@@ -8,6 +7,9 @@ set -e # Exit immediately if a command exits with a non-zero status.
 set -o pipefail #the return value of a pipeline is the status of
                 #the last command to exit with a non-zero status,
                 #or zero if no command exited with a non-zero status
+
+
+git pull
 
 
 #echo test 2> afile.txt    #redirect stderr
