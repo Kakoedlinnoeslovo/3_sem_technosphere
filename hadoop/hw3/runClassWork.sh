@@ -4,6 +4,7 @@ set -e
 set -o pipefail
 
 Log() {
+
     echo "[$( date +%c )] $*" >&2
 }
 
@@ -19,7 +20,7 @@ Log "REMOVING previous directory"
 hadoop fs -rm -r -f $OUTDIR
 
 Log "RUNNING JOB"
-hadoop jar ./build/libs/seminar3.jar SecondarySortDemo \
+hadoop jar ./build/libs/hw3.jar SecondarySortDemo \
            -Dmapreduce.job.reduces=$NREDUCERS \
            /data/seminar2/meteo/*.gz $OUTDIR
 
