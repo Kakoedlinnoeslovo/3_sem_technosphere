@@ -3,6 +3,8 @@
 set -e
 set -o pipefail
 
+git pull
+
 Log() {
 
     echo "[$( date +%c )] $*" >&2
