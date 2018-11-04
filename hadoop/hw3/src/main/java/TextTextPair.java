@@ -84,7 +84,7 @@ public class TextTextPair implements WritableComparable <TextTextPair> {
     @Override
     public String toString()
     {
-        return host + "\t" + query;
+        return query + "\t" + host;
     }
 
 
