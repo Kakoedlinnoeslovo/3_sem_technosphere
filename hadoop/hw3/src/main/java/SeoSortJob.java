@@ -1,8 +1,6 @@
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableComparator;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -12,10 +10,10 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.hadoop.io.Text;
 
 import java.net.URL;
 import java.io.IOException;
+
 
 
 public class SeoSortJob extends Configured implements Tool {
@@ -61,9 +59,9 @@ public class SeoSortJob extends Configured implements Tool {
 
             String query = line[0];
 
-            TextTextPair pair = new TextTextPair(query, host);
+            TextTextPair pair = new TextTextPair(host, query);
 
-            context.write(pair, new Text(host));
+            context.write(pair, new Text(query));
 
         }
     }
@@ -109,7 +107,6 @@ public class SeoSortJob extends Configured implements Tool {
             Text a_first = ((TextTextPair)a).getFirst();
             Text b_first = ((TextTextPair)b).getFirst();
 
-            //group is text part of key
             return a_first.compareTo(b_first);
         }
     }
@@ -122,18 +119,50 @@ public class SeoSortJob extends Configured implements Tool {
                 throws IOException, InterruptedException
         {
 
-            String query = key.getFirst().toString();
-            String host = key.getSecond().toString();
+            String host = key.getFirst().toString();
+            String query = key.getSecond().toString();
 
 
-            System.out.println("CURRENT QUN IN REDUCER" + query + host );
+            //System.out.println("CURRENT QUN IN REDUCER " + query + host );
 
-            for(Text item :values){
-                String itemStr = item.toString();
-                System.out.println(itemStr);
+
+
+//            for(Text item :values){
+//                String itemStr = item.toString();
+//                System.out.println(itemStr);
+//            }
+
+
+            String prevQuery = "";
+            int counter = 0;
+            int counterBest = 0;
+            String bestQuery = "";
+
+            for (Text t: values)
+            {
+                String tempQuery = t.toString();
+
+                if (! tempQuery.equals(prevQuery)){
+                    prevQuery = tempQuery;
+                    counter = 0;
+                }
+
+                counter+=1;
+
+                if (counter > counterBest){
+                    bestQuery = tempQuery;
+                    counterBest = counter;
+
+                }
+
             }
 
+            if (counterBest != 0)
+            {
 
+                TextTextPair pair = new TextTextPair(host, bestQuery);
+                context.write(new Text(pair.toString()), new Text(Integer.toString(counterBest)));
+            }
 
         }
     }

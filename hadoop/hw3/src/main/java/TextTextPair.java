@@ -8,9 +8,9 @@ import javax.annotation.Nonnull;
 
 public class TextTextPair implements WritableComparable <TextTextPair> {
 
-    private Text query;
     private Text host;
-    private static int HASHCONST = 163;
+    private Text query;
+    private static final int HASHCONST = 163;
 
 
 
@@ -23,37 +23,37 @@ public class TextTextPair implements WritableComparable <TextTextPair> {
     public TextTextPair(String host, String query)
     {
 
-        set(new Text(query), new Text(host));
+        set(new Text(host), new Text(query));
     }
 
     private void set(Text a, Text b)
     {
-        query = a;
-        host = b;
+        host = a;
+        query = b;
     }
 
     public Text getFirst()
     {
-        return query;
+        return host;
     }
 
     public Text getSecond()
     {
-        return host;
+        return query;
     }
 
     @Override
     public void write(DataOutput out) throws IOException
     {
-        query.write(out);
         host.write(out);
+        query.write(out);
     }
 
     @Override
     public void readFields(DataInput in) throws IOException
     {
-        query.readFields(in);
         host.readFields(in);
+        query.readFields(in);
     }
 
 
@@ -61,13 +61,13 @@ public class TextTextPair implements WritableComparable <TextTextPair> {
     public int compareTo(@Nonnull TextTextPair o)
     {
 
-        Text thisText = this.query;
-        Text thisInt = this.host;
+        Text thisText = this.host;
+        Text thisInt = this.query;
 
-        int cmp = thisText.compareTo(o.query);
+        int cmp = thisText.compareTo(o.host);
 
 
-        int ccr =  thisInt.compareTo(o.host);
+        int ccr =  thisInt.compareTo(o.query);
 
         //вк vk.com 7
         //вконтакте vk.com 7
@@ -78,13 +78,13 @@ public class TextTextPair implements WritableComparable <TextTextPair> {
     @Override
     public int hashCode()
     {
-        return query.hashCode() * HASHCONST + host.hashCode();
+        return host.hashCode() * HASHCONST + query.hashCode();
     }
 
     @Override
     public String toString()
     {
-        return query + "\t" + host;
+        return host + "\t" + query;
     }
 
 
