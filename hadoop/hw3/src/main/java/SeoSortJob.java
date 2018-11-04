@@ -136,9 +136,9 @@ public class SeoSortJob extends Configured implements Tool {
 
 
         job.setMapperClass(SeoSortJobMapper.class);
-        //job.setReducerClass(SeoSortJobReducer.class);
+        job.setReducerClass(SeoSortJobReducer.class);
 
-        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputKeyClass(TextIntPair.class);
         job.setMapOutputValueClass(Text.class);
 
         job.setOutputValueClass(Text.class);
