@@ -31,6 +31,6 @@ Log "REMOVING PREVIOUS DIRECTORY"
 hadoop fs -rm -r -f SeoSortJobOutput
 
 Log "RUNNING JOB"
-hadoop jar ./build/libs/hw3.jar SeoSortJob -Dmapreduce.job.reduces=200 -seo.minclicks=2
+hadoop jar ./build/libs/hw3.jar SeoSortJob -D mapreduce.job.reduces=200 - configuration.seo.minclicks=2
 
 Log "SUCCESS. RESULT in SeoSortJobOutput"
