@@ -20,7 +20,7 @@ public class SeoSortJob extends Configured implements Tool {
 
     public static int getMinClicks(Configuration conf)
     {
-        return conf.getInt("seo.minclicks", 1);
+        return conf.getInt("minclicks", 1);
     }
 
     @Override
