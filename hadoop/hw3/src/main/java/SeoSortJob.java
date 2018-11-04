@@ -18,6 +18,11 @@ import java.io.IOException;
 
 public class SeoSortJob extends Configured implements Tool {
 
+    public static int getMinClicks(Configuration conf)
+    {
+        return conf.getInt("seo.minclicks", 1);
+    }
+
     @Override
     public int run(String[] args)
             throws Exception
@@ -120,22 +125,15 @@ public class SeoSortJob extends Configured implements Tool {
         {
 
             String host = key.getFirst().toString();
-            String query = key.getSecond().toString();
+            Configuration conf = context.getConfiguration();
+            int minClicks = getMinClicks(conf);
 
-
-            //System.out.println("CURRENT QUN IN REDUCER " + query + host );
-
-
-
-//            for(Text item :values){
-//                String itemStr = item.toString();
-//                System.out.println(itemStr);
-//            }
+            System.out.println("MINCLICKS = " + minClicks);
 
 
             String prevQuery = "";
             int counter = 0;
-            int counterBest = 0;
+            int counterBest = minClicks;
             String bestQuery = "";
 
             for (Text t: values)
@@ -157,7 +155,7 @@ public class SeoSortJob extends Configured implements Tool {
 
             }
 
-            if (counterBest != 0)
+            if (counterBest > minClicks)
             {
 
                 TextTextPair pair = new TextTextPair(host, bestQuery);
