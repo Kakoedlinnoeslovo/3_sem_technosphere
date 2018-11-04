@@ -14,6 +14,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.hadoop.io.Text;
 
+import java.net.URL;
 import java.io.IOException;
 
 
@@ -36,7 +37,7 @@ public class SeoSortJob extends Configured implements Tool {
     }
 
 
-    public static class SeoSortJobMapper extends Mapper<LongWritable, Text, TextIntPair, Text>
+    public static class SeoSortJobMapper extends Mapper<LongWritable, Text, TextTextPair, Text>
     {
 
         @Override
@@ -46,22 +47,33 @@ public class SeoSortJob extends Configured implements Tool {
 
             String[] line = value.toString().split("\t");
 
-            //System.out.println("QUERY: " + line[0] + " URL: " + line[1]);
+            if (line.length != 2){
+                throw  new RuntimeException("Invalid line" + line[0]);
+            }
 
-            TextIntPair pair = new TextIntPair(line[1], 1);
-            Text query = new Text(line[0]);
-            //в контакте vk.com
-            context.write(pair, query);
+            String host;
+
+            try{
+                host = new URL(line[1]).getHost();
+            } catch (IOException e){
+                host = line[1];
+            }
+
+            String query = line[0];
+
+            TextTextPair pair = new TextTextPair(query, host);
+
+            context.write(pair, new Text(host));
 
         }
     }
 
-    public static class SeoSortJobPartitioner extends Partitioner <TextIntPair, Text>
+    public static class SeoSortJobPartitioner extends Partitioner <TextTextPair, Text>
     {
         @Override
-        public int getPartition(TextIntPair key, Text val, int numPartitions)
+        public int getPartition(TextTextPair key, Text val, int numPartitions)
         {
-            return Math.abs(key.getSecond().hashCode()) % numPartitions;
+            return Math.abs(key.getFirst().hashCode()) % numPartitions;
         }
 
     }
@@ -73,13 +85,13 @@ public class SeoSortJob extends Configured implements Tool {
 
         protected SeoSortJobKeyComporator()
         {
-            super(TextIntPair.class, true);
+            super(TextTextPair.class, true);
         }
 
         @Override
         public int compare(WritableComparable a, WritableComparable b)
         {
-            return ((TextIntPair)a).compareTo((TextIntPair)b);
+            return ((TextTextPair)a).compareTo((TextTextPair)b);
         }
     }
 
@@ -88,14 +100,14 @@ public class SeoSortJob extends Configured implements Tool {
     {
         protected SeoSortJobGrouper()
         {
-            super(TextIntPair.class, true);
+            super(TextTextPair.class, true);
         }
 
         @Override
         public int compare(WritableComparable a, WritableComparable b)
         {
-            Text a_first = ((TextIntPair)a).getFirst();
-            Text b_first = ((TextIntPair)b).getFirst();
+            Text a_first = ((TextTextPair)a).getFirst();
+            Text b_first = ((TextTextPair)b).getFirst();
 
             //group is text part of key
             return a_first.compareTo(b_first);
@@ -103,22 +115,26 @@ public class SeoSortJob extends Configured implements Tool {
     }
 
 
-    public static class SeoSortJobReducer extends Reducer <TextIntPair, Text, Text, Text>
+    public static class SeoSortJobReducer extends Reducer <TextTextPair, Text, Text, Text>
     {
         @Override
-        protected void reduce(TextIntPair key, Iterable<Text> values, Context context)
+        protected void reduce(TextTextPair key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException
         {
-            String query = values.iterator().next().toString();
-            String url = key.getFirst().toString();
-            int number = key.getSecond().get();
 
-            System.out.println("CURRENT QUN IN REDUCER" + query + url + number);
-
-            String numberStr = String.format("%d", number);
+            String query = key.getFirst().toString();
+            String host = key.getSecond().toString();
 
 
-            context.write(new Text(query), new Text(url + " " + numberStr));
+            System.out.println("CURRENT QUN IN REDUCER" + query + host );
+
+            for(Text item :values){
+                String itemStr = item.toString();
+                System.out.println(itemStr);
+            }
+
+
+
         }
     }
 
@@ -138,7 +154,7 @@ public class SeoSortJob extends Configured implements Tool {
         job.setMapperClass(SeoSortJobMapper.class);
         job.setReducerClass(SeoSortJobReducer.class);
 
-        job.setMapOutputKeyClass(TextIntPair.class);
+        job.setMapOutputKeyClass(TextTextPair.class);
         job.setMapOutputValueClass(Text.class);
 
         job.setOutputValueClass(Text.class);
