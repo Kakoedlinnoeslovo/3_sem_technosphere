@@ -51,7 +51,6 @@ public class SeoSortJob extends Configured implements Tool {
             Configuration conf = context.getConfiguration();
             int minClicks = getMinClicks(conf);
 
-            System.out.println("MINCLICKS = " + minClicks);
 
             String[] line = value.toString().split("\t");
 
@@ -133,8 +132,6 @@ public class SeoSortJob extends Configured implements Tool {
             Configuration conf = context.getConfiguration();
             int minClicks = getMinClicks(conf);
 
-            //System.out.println("MINCLICKS = " + minClicks);
-
 
             String prevQuery = "";
             int counter = 0;
@@ -164,7 +161,6 @@ public class SeoSortJob extends Configured implements Tool {
             {
 
                 TextTextPair pair = new TextTextPair(host, bestQuery);
-                //System.out.println("HERE IS RESULT " + pair.toString() + new Text(Integer.toString(counterBest)));
                 context.write(new Text(pair.toString()), new Text(Integer.toString(counterBest)));
             }
 
