@@ -22,6 +22,8 @@ Log() {
 
     echo "[$( date +%c )] $*" >&2
 }
+
+
 Log "BUILDING"
 ./gradlew jar
 
@@ -29,6 +31,6 @@ Log "REMOVING PREVIOUS DIRECTORY"
 hadoop fs -rm -r -f SeoSortJobOutput
 
 Log "RUNNING JOB"
-hadoop jar ./build/libs/hw3.jar SeoSortJob
+hadoop jar ./build/libs/hw3.jar SeoSortJob -Dmapreduce.job.reduces=4
 
 Log "SUCCESS. RESULT in SeoSortJobOutput"
