@@ -159,6 +159,7 @@ public class SeoSortJob extends Configured implements Tool {
             {
 
                 TextTextPair pair = new TextTextPair(host, bestQuery);
+                System.out.println("HERE IS RESULT " + pair.toString() + new Text(Integer.toString(counterBest)));
                 context.write(new Text(pair.toString()), new Text(Integer.toString(counterBest)));
             }
 
