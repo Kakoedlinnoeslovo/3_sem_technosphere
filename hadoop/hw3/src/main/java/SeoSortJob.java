@@ -1,7 +1,10 @@
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -37,11 +40,65 @@ public class SeoSortJob extends Configured implements Tool {
     {
 
         @Override
-        protected void map(LongWritable id, Text value, Context context){
+        protected void map(LongWritable id, Text value, Context context)
+                throws IOException, InterruptedException
+        {
 
             String[] line = value.toString().split("\t");
 
-            System.out.println("QUERY: " + line[0] + " URL: " + line[1]);
+            //System.out.println("QUERY: " + line[0] + " URL: " + line[1]);
+
+            TextIntPair pair = new TextIntPair(line[1], 1);
+            Text query = new Text(line[0]);
+            //в контакте vk.com
+            context.write(pair, query);
+
+        }
+    }
+
+    public static class SeoSortJobPartitioner extends Partitioner <TextIntPair, Text>
+    {
+        @Override
+        public int getPartition(TextIntPair key, Text val, int numPartitions)
+        {
+            return Math.abs(key.getSecond().hashCode()) % numPartitions;
+        }
+
+    }
+
+
+
+    public static class SeoSortJobKeyComporator extends WritableComparator
+    {
+
+        protected SeoSortJobKeyComporator()
+        {
+            super(TextIntPair.class, true);
+        }
+
+        @Override
+        public int compare(WritableComparable a, WritableComparable b)
+        {
+            return ((TextIntPair)a).compareTo((TextIntPair)b);
+        }
+    }
+
+
+    public static class SeoSortJobGrouper extends WritableComparator
+    {
+        protected SeoSortJobGrouper()
+        {
+            super(TextIntPair.class, true);
+        }
+
+        @Override
+        public int compare(WritableComparable a, WritableComparable b)
+        {
+            Text a_first = ((TextIntPair)a).getFirst();
+            Text b_first = ((TextIntPair)b).getFirst();
+
+            //group is text part of key
+            return a_first.compareTo(b_first);
         }
     }
 
@@ -50,8 +107,18 @@ public class SeoSortJob extends Configured implements Tool {
     {
         @Override
         protected void reduce(TextIntPair key, Iterable<Text> values, Context context)
+                throws IOException, InterruptedException
         {
+            String query = values.iterator().next().toString();
+            String url = key.getFirst().toString();
+            int number = key.getSecond().get();
 
+            System.out.println("CURRENT QUN IN REDUCER" + query + url + number);
+
+            String numberStr = String.format("%d", number);
+
+
+            context.write(new Text(query), new Text(url + " " + numberStr));
         }
     }
 
@@ -77,9 +144,9 @@ public class SeoSortJob extends Configured implements Tool {
         job.setOutputValueClass(Text.class);
         job.setOutputKeyClass(Text.class);
 
-        //job.setPartitionerClass();
-        //job.setSortComparatorClass();
-        //job.setGroupingComparatorClass();
+        job.setPartitionerClass(SeoSortJobPartitioner.class);
+        job.setSortComparatorClass(SeoSortJobKeyComporator.class);
+        job.setGroupingComparatorClass(SeoSortJobGrouper.class);
 
 
 

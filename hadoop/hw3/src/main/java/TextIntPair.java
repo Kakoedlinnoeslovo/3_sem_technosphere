@@ -13,6 +13,13 @@ public class TextIntPair implements WritableComparable <TextIntPair> {
     private IntWritable counter;
 
 
+
+    public TextIntPair()
+    {
+        set(new Text(), new IntWritable());
+    }
+
+
     public TextIntPair(String url, int counter)
     {
         set(new Text(url), new IntWritable(counter));
@@ -55,7 +62,14 @@ public class TextIntPair implements WritableComparable <TextIntPair> {
         IntWritable thisInt = this.counter;
 
         int cmp = thisText.compareTo(o.url);
-        return (cmp == 0) ? thisInt.compareTo(o.counter) : cmp;
+
+
+        int ccr =  - thisInt.compareTo(o.counter);
+
+        //вк vk.com 7
+        //вконтакте vk.com 7
+
+        return (cmp == 0) ? ccr: cmp;
     }
 
 

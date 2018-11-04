@@ -101,7 +101,8 @@ public class SecondarySortDemo extends Configured implements Tool {
          * А значит, в первом значении будет самая высокая температура этой метеостанции
          *   за конкретный день конкретного месяца. выводим ее вместе с годом.
          */
-        protected void reduce(TextFloatPair key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+        protected void reduce(TextFloatPair key, Iterable<IntWritable> values, Context context)
+                throws IOException, InterruptedException {
             int year = values.iterator().next().get();
             float temp = key.getSecond().get();
 
